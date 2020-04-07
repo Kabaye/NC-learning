@@ -4,6 +4,7 @@ import edu.netcracker.bpp.bpp.annotation.Inject;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class InjectAnnotationBeanPostProcessor implements BeanPostProcessor {
@@ -28,7 +30,6 @@ public class InjectAnnotationBeanPostProcessor implements BeanPostProcessor {
         dependencies = new ArrayList<>();
     }
 
-    //    constructor injection
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
@@ -44,14 +45,14 @@ public class InjectAnnotationBeanPostProcessor implements BeanPostProcessor {
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class<?> beanClass = bean.getClass();
         for (Field field : beanClass.getDeclaredFields()) {
-            beansWithInjection.computeIfPresent(Pair.of(beanClass.getPackageName(), field.getName()), (pair, bName) -> {
+            final String bName = beansWithInjection.get(Pair.of(beanClass.getPackageName(), field.getName()));
+            if (Objects.nonNull(bName)) {
                 if (bName.equals(beanName)) {
                     ReflectionUtils.makeAccessible(field);
                     Object valueToInject = findOrCreate(field.getType(), field.getName());
                     ReflectionUtils.setField(field, bean, valueToInject);
                 }
-                return bName;
-            });
+            }
             dependencies.clear();
         }
         return bean;
@@ -62,8 +63,8 @@ public class InjectAnnotationBeanPostProcessor implements BeanPostProcessor {
         if (dependencies.contains(name)) {
             throw new RuntimeException("There are some unresolved circular dependencies");
         }
-        if (configurableListableBeanFactory.containsBean(name)) {
-            return configurableListableBeanFactory.getBean(name);
+        if (BeanFactoryUtils.beansOfTypeIncludingAncestors(configurableListableBeanFactory, clazz).size() != 0) {
+            return BeanFactoryUtils.beanOfTypeIncludingAncestors(configurableListableBeanFactory, clazz);
         } else {
             dependencies.add(name);
             Constructor<?> constructor = clazz.getConstructors()[0];
