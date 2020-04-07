@@ -2,13 +2,13 @@ package edu.netcracker.bpp;
 
 import edu.netcracker.bpp.bean.Bean1;
 import edu.netcracker.bpp.bean.Bean2;
-import edu.netcracker.bpp.bean.Bean3;
 import edu.netcracker.bpp.bpp.annotation.Inject;
 import edu.netcracker.bpp.test.test1.TestClass1;
 import edu.netcracker.bpp.test.test1.TestClass2;
 import edu.netcracker.bpp.test.test2.pkg1.TestClass3;
 import edu.netcracker.bpp.test.test2.pkg2.TestClass4;
 import edu.netcracker.bpp.test.test3.TestClass5;
+import edu.netcracker.bpp.test.test4.TestClass6;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,8 +21,6 @@ class BppApplicationTests {
     private Bean1 bean1;
     @Inject
     private Bean2 bean2;
-    @Inject
-    private Bean3 bean3;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -35,11 +33,6 @@ class BppApplicationTests {
     void checkInjected() {
         Assert.notNull(bean1, "bean 1 is null");
         Assert.notNull(bean2, "bean 2 is null");
-    }
-
-    @Test
-    void checkCreatedAndInjected() {
-        Assert.notNull(bean3, "bean 3 is null");
     }
 
     @Test
@@ -59,4 +52,8 @@ class BppApplicationTests {
         Assert.notNull(((TestClass5) applicationContext.getBean("testClass5")).getTestInterface1(), "");
     }
 
+    @Test
+    void testInjectingSpringBean() {
+        Assert.notNull(applicationContext.getBean("testClass6", TestClass6.class).getInjectAnnotationBeanPostProcessor(), "");
+    }
 }
