@@ -1,2 +1,7 @@
 server:
   port: 8664
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/ORDER-APP
+    username: postgres

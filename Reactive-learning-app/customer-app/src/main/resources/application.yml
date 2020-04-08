@@ -1,2 +1,7 @@
 server:
   port: 8663
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/CUSTOMER-APP
+    username: postgres
