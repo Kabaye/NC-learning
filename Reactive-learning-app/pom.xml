@@ -8,11 +8,12 @@
         <version>2.3.0.M4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>edu.netcracker</groupId>
     <artifactId>reactive-learning-app</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>reactive-learning-app</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Learning project with Reactive SQL/Web</description>
 
     <properties>
         <java.version>14</java.version>
@@ -84,5 +85,10 @@
             <url>https://repo.spring.io/milestone</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <modules>
+        <module>customer-app</module>
+        <module>order-app</module>
+    </modules>
 
 </project>
