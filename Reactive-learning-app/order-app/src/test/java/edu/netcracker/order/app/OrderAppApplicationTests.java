@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 @SpringBootTest
 class OrderAppApplicationTests {
@@ -51,6 +52,19 @@ class OrderAppApplicationTests {
                 System.out::println);
 
         Thread.sleep(1_000);
+    }
+
+    @Test
+    void testFlux4() {
+        Flux<String> flux = Flux.generate(
+                AtomicLong::new,
+                (state, sink) -> {
+                    long i = state.getAndIncrement();
+                    sink.next("3 x " + i + " = " + 3 * i);
+                    if (i == 10) sink.complete();
+                    return state;
+                }, (state) -> System.out.println("state: " + state));
+        flux.subscribe(System.out::println);
     }
 
 }
