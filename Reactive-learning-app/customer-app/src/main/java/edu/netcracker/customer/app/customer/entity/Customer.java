@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor
 public class Customer {
     @Id
-    private int id;
+    private Integer id;
     private String name;
     private String address;
     private Currency currency;

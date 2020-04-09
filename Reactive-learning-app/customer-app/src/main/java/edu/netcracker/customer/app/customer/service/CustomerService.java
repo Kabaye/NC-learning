@@ -28,7 +28,7 @@ public class CustomerService {
 
     public Mono<Customer> updateCustomer(Integer id, Customer customerForUpd) {
         return customerRepository.findCustomerById(id).map(customer ->
-                new Customer(customerForUpd.getId(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
+                new Customer(customer.getId(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
                 .flatMap(customerRepository::save);
     }
 
