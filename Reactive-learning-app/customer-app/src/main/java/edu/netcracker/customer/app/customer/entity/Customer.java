@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id;
 public class Customer {
     @Id
     private Integer id;
+    private String email;
     private String name;
     private String address;
     private Currency currency;

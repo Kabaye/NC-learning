@@ -66,5 +66,4 @@ class OrderAppApplicationTests {
                 }, (state) -> System.out.println("state: " + state));
         flux.subscribe(System.out::println);
     }
-
 }
