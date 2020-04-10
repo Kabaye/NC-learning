@@ -16,6 +16,6 @@ public class Product {
     private Integer id;
     private String name;
     private String description;
-    private Long price;
+    private Float price;
     private Currency currency;
 }
