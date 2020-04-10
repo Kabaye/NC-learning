@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/customers")
@@ -22,9 +25,11 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @GetMapping("/{id}")
-    public Mono<Customer> findCustomerById(@PathVariable Integer id) {
-        return customerService.findCustomerById(id);
+    @GetMapping("/customer")
+    public Mono<Customer> findCustomer(@RequestParam(required = false) Integer customerId, @RequestParam(required = false) String email) {
+        return Objects.nonNull(customerId) ?
+                customerService.findCustomerById(customerId) :
+                customerService.findCustomerByEmail(email);
     }
 
     @GetMapping

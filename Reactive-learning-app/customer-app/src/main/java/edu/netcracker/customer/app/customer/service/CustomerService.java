@@ -28,11 +28,15 @@ public class CustomerService {
 
     public Mono<Customer> updateCustomer(Integer id, Customer customerForUpd) {
         return customerRepository.findCustomerById(id).map(customer ->
-                new Customer(customer.getId(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
+                new Customer(customer.getId(), customerForUpd.getEmail(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
                 .flatMap(customerRepository::save);
     }
 
     public Mono<Void> deleteCustomer(Integer id) {
         return customerRepository.deleteById(id);
+    }
+
+    public Mono<Customer> findCustomerByEmail(String email) {
+        return customerRepository.findCustomerByEmail(email);
     }
 }
