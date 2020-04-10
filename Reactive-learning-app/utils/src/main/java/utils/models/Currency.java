@@ -1,4 +1,4 @@
-package edu.netcracker.order.app.product.entity;
+package utils.models;
 
 public enum Currency {
     USD,

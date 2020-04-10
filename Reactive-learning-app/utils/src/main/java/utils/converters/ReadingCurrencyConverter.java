@@ -1,9 +1,9 @@
-package edu.netcracker.customer.app.customer.conversion;
+package utils.converters;
 
-import edu.netcracker.customer.app.customer.entity.Currency;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.stereotype.Component;
+import utils.models.Currency;
 
 @ReadingConverter
 @Component
