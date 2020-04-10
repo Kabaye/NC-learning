@@ -11,7 +11,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Table("products_orders")
+@Table("orders_products")
 public class OrdersProductsRelationModel {
     @Id
     private Integer id;
