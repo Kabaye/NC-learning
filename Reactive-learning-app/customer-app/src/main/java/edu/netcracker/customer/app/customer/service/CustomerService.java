@@ -15,7 +15,7 @@ public class CustomerService {
     }
 
     public Mono<Customer> findCustomerById(Integer id) {
-        return customerRepository.findCustomerById(id);
+        return customerRepository.findById(id);
     }
 
     public Flux<Customer> findAllCustomers() {
@@ -27,7 +27,7 @@ public class CustomerService {
     }
 
     public Mono<Customer> updateCustomer(Integer id, Customer customerForUpd) {
-        return customerRepository.findCustomerById(id).map(customer ->
+        return customerRepository.findById(id).map(customer ->
                 new Customer(customer.getId(), customerForUpd.getEmail(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
                 .flatMap(customerRepository::save);
     }
