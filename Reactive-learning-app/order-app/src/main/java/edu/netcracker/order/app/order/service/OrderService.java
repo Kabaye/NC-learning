@@ -11,6 +11,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,21 +20,40 @@ public class OrderService {
     private final DefaultOrdersProductsRelationRepository ordersProductsRelationRepository;
     private final ProductRepository productRepository;
 
+    private final Function<Float, Float> convertTotalPriceToDB;
+    private final Function<Float, Float> convertTotalPriceFromDB;
+
     public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.ordersProductsRelationRepository = ordersProductsRelationRepository;
         this.productRepository = productRepository;
+
+        convertTotalPriceFromDB = (fl) -> fl / 1000;
+
+        convertTotalPriceToDB = (fl) -> {
+            long l = (long) (fl * 1000);
+            return (float) l;
+        };
+
     }
 
     public Mono<Order> saveOrder(Order order) {
-        return Mono.just(order).flatMap(order1 -> productRepository.findAllById(order1.getProducts().stream()
+        return Mono.just(order).flatMap(ord -> productRepository.findAllById(ord.getProducts().stream()
                 .map(productIntegerPair -> productIntegerPair.getFirst().getId())
                 .collect(Collectors.toList()))
-                .map(product -> order1.getProducts().add(Pair.of(product, order.getProducts().stream()
-                        .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(product.getId()))
-                        .findFirst().orElseThrow(RuntimeException::new).getSecond())))
-                .then(Mono.just(order1)))
-                .map(OrderUtils::postProcessOrderSum).flatMap(orderRepository::save)
+                .map(product -> {
+                    ord.getProducts().stream()
+                            .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(product.getId()))
+                            .forEach(productIntegerPair -> {
+                                productIntegerPair.getFirst().setPrice(product.getPrice());
+                                productIntegerPair.getFirst().setName(product.getName());
+                                productIntegerPair.getFirst().setDescription(product.getDescription());
+                            });
+                    return ord;
+                })
+                .then(Mono.just(order)))
+                .map(order1 -> OrderUtils.postProcessOrderSum(order1, convertTotalPriceToDB))
+                .flatMap(orderRepository::save)
                 .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
                         stream().
                         parallel()
@@ -70,6 +90,6 @@ public class OrderService {
                                                     .getAmount()))
                                             .collect(Collectors.toList()));
                                     return products;
-                                })).then(Mono.just(order)).map(OrderUtils::postProcessOrderSum));
+                                })).then(Mono.just(order)).map(order1 -> OrderUtils.postProcessOrderSum(order1, convertTotalPriceFromDB)));
     }
 }

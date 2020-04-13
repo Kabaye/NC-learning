@@ -49,7 +49,7 @@ public class ProductService {
 
     public Mono<Product> updateProduct(Integer id, Product productForUpd) {
         return findProductById(id).map(product -> new Product(product.getId(), productForUpd.getName(), productForUpd.getDescription(),
-                productForUpd.getPrice(), productForUpd.getCurrency())).map(moneyToDB).flatMap(this::saveProduct);
+                productForUpd.getPrice())).map(moneyToDB).flatMap(this::saveProduct);
     }
 
     public Mono<Void> deleteProduct(Integer id) {

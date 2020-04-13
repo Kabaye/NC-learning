@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import utils.models.Currency;
 
 @Data
 @AllArgsConstructor
@@ -17,5 +16,4 @@ public class Product {
     private String name;
     private String description;
     private Float price;
-    private Currency currency;
 }

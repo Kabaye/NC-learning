@@ -1,5 +1,7 @@
 package edu.netcracker.order.app.order.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import edu.netcracker.order.app.order.utils.PairDeserializer;
 import edu.netcracker.order.app.product.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +24,9 @@ public class Order {
     @Id
     private Integer id;
     @Transient
+    @JsonDeserialize(using = PairDeserializer.class)
     private List<Pair<Product, Integer>> products = new ArrayList<>();
     private String customAddress;
-    private Float sumPrice = 0F;
+    private String customerEmail;
+    private Float totalPrice = 0F;
 }
