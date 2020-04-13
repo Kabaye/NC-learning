@@ -10,8 +10,8 @@ import edu.netcracker.order.app.product.repository.ProductRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import utils.utils.MoneyUtils;
 
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,21 +20,10 @@ public class OrderService {
     private final DefaultOrdersProductsRelationRepository ordersProductsRelationRepository;
     private final ProductRepository productRepository;
 
-    private final Function<Float, Float> convertTotalPriceToDB;
-    private final Function<Float, Float> convertTotalPriceFromDB;
-
     public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.ordersProductsRelationRepository = ordersProductsRelationRepository;
         this.productRepository = productRepository;
-
-        convertTotalPriceFromDB = (fl) -> fl / 1000;
-
-        convertTotalPriceToDB = (fl) -> {
-            long l = (long) (fl * 1000);
-            return (float) l;
-        };
-
     }
 
     public Mono<Order> saveOrder(Order order) {
@@ -52,7 +41,7 @@ public class OrderService {
                     return ord;
                 })
                 .then(Mono.just(order)))
-                .map(order1 -> OrderUtils.postProcessOrderSum(order1, convertTotalPriceToDB))
+                .map(order1 -> OrderUtils.postProcessOrderSum(order1, MoneyUtils::convertToDBPrecision))
                 .flatMap(orderRepository::save)
                 .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
                         stream().
@@ -90,6 +79,7 @@ public class OrderService {
                                                     .getAmount()))
                                             .collect(Collectors.toList()));
                                     return products;
-                                })).then(Mono.just(order)).map(order1 -> OrderUtils.postProcessOrderSum(order1, convertTotalPriceFromDB)));
+                                })).then(Mono.just(order))
+                .map(order1 -> OrderUtils.postProcessOrderSum(order1, MoneyUtils::convertFromDbPrecision)));
     }
 }

@@ -5,7 +5,8 @@ public class MoneyUtils {
     }
 
     public static Float convertToDBPrecision(Float money) {
-        return money * 1000;
+        long l = (long) (money * 1000);
+        return (float) l;
     }
 
     public static Float convertFromDbPrecision(Float money) {
