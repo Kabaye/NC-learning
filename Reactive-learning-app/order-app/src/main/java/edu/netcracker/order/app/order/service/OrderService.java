@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.utils.MoneyUtils;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +55,16 @@ public class OrderService {
                         then(Mono.just(ord)));
     }
 
+    public Mono<Order> updateOrder(Integer id, Order order) {
+        return orderRepository.findById(id).flatMap(order1 -> {
+            if (Objects.isNull(order1)) {
+                return Mono.error(new RuntimeException("No such product for provided id."));
+            }
+            order.setId(id);
+            return orderRepository.save(order);
+        });
+    }
+
     public Mono<Order> findOrder(Integer id) {
         final Mono<Order> foundOrder = orderRepository.findById(id);
         return foundOrder.flatMap(this::findWithAllDetails);
@@ -66,6 +77,40 @@ public class OrderService {
 
     public Mono<Void> deleteOrder(Integer id) {
         return ordersProductsRelationRepository.deleteOrderProductsRelation(id).then(orderRepository.deleteById(id));
+    }
+
+    public Mono<Order> addProduct(Integer orderId, Integer productId, Integer amount) {
+        return this.findOrder(orderId)
+                .flatMap(order -> ordersProductsRelationRepository.addProductToOrder(new OrdersProductsRelationModel(null, orderId, productId, amount))
+                        .map(ordersProductsRelationModel -> {
+                            order.getProducts().add(Pair.of(new Product(productId, null, null, null), amount));
+                            return ordersProductsRelationModel;
+                        }).flatMap(ordersProductsRelationModel -> productRepository.findById(productId)
+                                .map(product -> {
+                                    order.getProducts().stream()
+                                            .filter(productIntegerPair -> product.getId().equals(productIntegerPair.getFirst().getId()))
+                                            .forEach(productIntegerPair -> {
+                                                productIntegerPair.getFirst().setName(product.getName());
+                                                productIntegerPair.getFirst().setDescription(product.getDescription());
+                                                productIntegerPair.getFirst().setPrice(product.getPrice());
+                                            });
+                                    return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision);
+                                })
+                        )).flatMap(order -> updateOrder(orderId, order));
+    }
+
+    public Mono<Order> deleteProduct(Integer orderId, Integer productId) {
+        return this.findOrder(orderId)
+                .flatMap(order -> ordersProductsRelationRepository.deleteProductFromOrder(orderId, productId).then(Mono.just(order)))
+                .flatMap(order -> productRepository.findById(productId)
+                        .map(product -> {
+                            order.getProducts().stream()
+                                    .filter(productIntegerPair -> product.getId().equals(productIntegerPair.getFirst().getId()))
+                                    .findAny()
+                                    .ifPresent(productIntegerPair -> order.getProducts().remove(productIntegerPair));
+                            return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision);
+                        })
+                ).flatMap(order -> updateOrder(orderId, order));
     }
 
     private Mono<? extends Order> findWithAllDetails(Order order) {

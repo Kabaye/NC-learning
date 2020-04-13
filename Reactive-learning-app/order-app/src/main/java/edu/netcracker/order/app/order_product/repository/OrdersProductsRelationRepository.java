@@ -11,4 +11,6 @@ interface OrdersProductsRelationRepository extends ReactiveCrudRepository<Orders
     Mono<Void> deleteAllByOrderId(Integer orderId);
 
     Mono<OrdersProductsRelationModel> findByOrderIdAndProductId(Integer orderId, Integer productId);
+
+    Mono<Void> deleteByOrderIdAndProductId(Integer orderId, Integer productId);
 }

@@ -28,8 +28,8 @@ public class DefaultOrdersProductsRelationRepository {
         return ordersProductsRelationRepository.deleteAllByOrderId(orderId);
     }
 
-    public Mono<Void> deleteProductFromOrder(Integer id) {
-        return ordersProductsRelationRepository.deleteById(id);
+    public Mono<Void> deleteProductFromOrder(Integer orderId, Integer productId) {
+        return ordersProductsRelationRepository.deleteByOrderIdAndProductId(orderId, productId);
     }
 
     public Mono<OrdersProductsRelationModel> addProductToOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
