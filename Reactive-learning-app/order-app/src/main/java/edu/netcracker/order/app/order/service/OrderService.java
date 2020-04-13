@@ -64,6 +64,10 @@ public class OrderService {
                 .flatMap(this::findWithAllDetails);
     }
 
+    public Mono<Void> deleteOrder(Integer id) {
+        return ordersProductsRelationRepository.deleteOrderProductsRelation(id).then(orderRepository.deleteById(id));
+    }
+
     private Mono<? extends Order> findWithAllDetails(Order order) {
         return ordersProductsRelationRepository.getAllOrderProducts(order.getId())
                 .collectList()

@@ -1,7 +1,5 @@
-package edu.netcracker.order.app.controller;
+package edu.netcracker.order.app.product.controller;
 
-import edu.netcracker.order.app.order.entity.Order;
-import edu.netcracker.order.app.order.service.OrderService;
 import edu.netcracker.order.app.product.entity.Product;
 import edu.netcracker.order.app.product.service.ProductService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,52 +12,35 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RestController("/api/v1")
-public class OrderProductController {
-    private final OrderService orderService;
+@RestController("/api/v1/products")
+public class ProductController {
     private final ProductService productService;
 
-    public OrderProductController(OrderService orderService, ProductService productService) {
-        this.orderService = orderService;
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
-    @GetMapping("/orders/{orderId}")
-    public Mono<Order> findOrder(@PathVariable Integer orderId) {
-        return orderService.findOrder(orderId);
-    }
-
-    @GetMapping("/orders")
-    public Flux<Order> findAllOrders() {
-        return orderService.findAll();
-    }
-
-    @PostMapping("/products")
+    @PostMapping
     public Mono<Product> saveProduct(@RequestBody Product product) {
         return productService.saveProduct(product);
     }
 
-    @PostMapping("/orders")
-    public Mono<Order> saveOrder(@RequestBody Order order) {
-        return orderService.saveOrder(order);
-    }
-
-    @PutMapping("/products/{id}")
+    @PutMapping("/{id}")
     public Mono<Product> updateProduct(@PathVariable Integer id, @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public Mono<Void> deleteProduct(@PathVariable Integer id) {
         return productService.deleteProduct(id);
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public Flux<Product> findAllProducts() {
         return productService.findAllProducts();
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public Mono<Product> findProduct(@PathVariable Integer id) {
         return productService.findProductById(id);
     }
