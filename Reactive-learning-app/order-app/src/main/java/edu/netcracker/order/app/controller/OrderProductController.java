@@ -29,15 +29,19 @@ public class OrderProductController {
         return orderService.findOrder(orderId);
     }
 
-    @PostMapping("/orders")
-    public Mono<Order> saveOrder(@RequestBody Order order) {
-        return orderService.saveOrder(order);
+    @GetMapping("/orders")
+    public Flux<Order> findAllOrders() {
+        return orderService.findAll();
     }
-
 
     @PostMapping("/products")
     public Mono<Product> saveProduct(@RequestBody Product product) {
         return productService.saveProduct(product);
+    }
+
+    @PostMapping("/orders")
+    public Mono<Order> saveOrder(@RequestBody Order order) {
+        return orderService.saveOrder(order);
     }
 
     @PutMapping("/products/{id}")
@@ -51,7 +55,7 @@ public class OrderProductController {
     }
 
     @GetMapping("/products")
-    public Flux<Product> findAll() {
+    public Flux<Product> findAllProducts() {
         return productService.findAllProducts();
     }
 

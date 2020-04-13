@@ -9,6 +9,7 @@ import edu.netcracker.order.app.product.entity.Product;
 import edu.netcracker.order.app.product.repository.ProductRepository;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import utils.utils.MoneyUtils;
 
@@ -55,7 +56,16 @@ public class OrderService {
 
     public Mono<Order> findOrder(Integer id) {
         final Mono<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder.flatMap(order -> ordersProductsRelationRepository.getAllOrderProducts(order.getId())
+        return foundOrder.flatMap(this::findWithAllDetails);
+    }
+
+    public Flux<Order> findAll() {
+        return orderRepository.findAll()
+                .flatMap(this::findWithAllDetails);
+    }
+
+    private Mono<? extends Order> findWithAllDetails(Order order) {
+        return ordersProductsRelationRepository.getAllOrderProducts(order.getId())
                 .collectList()
                 .map(ordersProductsRelationModels -> {
                     ordersProductsRelationModels.forEach(ordersProductsRelationModel -> {
@@ -80,6 +90,6 @@ public class OrderService {
                                             .collect(Collectors.toList()));
                                     return products;
                                 })).then(Mono.just(order))
-                .map(order1 -> OrderUtils.postProcessOrderSum(order1, MoneyUtils::convertFromDbPrecision)));
+                .map(order1 -> OrderUtils.postProcessOrderSum(order1, MoneyUtils::convertFromDbPrecision));
     }
 }
