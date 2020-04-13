@@ -36,29 +36,30 @@ public class OrderService {
 
     public Mono<Order> findOrder(Integer id) {
         final Mono<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder
-                .flatMapMany(order -> ordersProductsRelationRepository.getAllOrderProducts(order.getId()))
-                .flatMap(ordersProductsRelationModel -> foundOrder.map(order -> {
-                    Product product = new Product();
-                    product.setId(ordersProductsRelationModel.getProductId());
-                    order.getProducts().add(Pair.of(product, ordersProductsRelationModel.getAmount()));
-                    return order;
-                })).flatMap(order -> productRepository.findAllById(order.getProducts().stream()
-                        .parallel()
-                        .map(Pair::getFirst)
-                        .map(Product::getId)
-                        .collect(Collectors.toList())
-                ).map(product -> {
-                    Product tempProduct = order.getProducts().stream()
-                            .map(Pair::getFirst)
-                            .filter(order1 -> order1.getId().equals(order.getId()))
-                            .findFirst()
-                            .orElseThrow(RuntimeException::new);
-                    tempProduct.setPrice(product.getPrice());
-                    tempProduct.setCurrency(product.getCurrency());
-                    tempProduct.setDescription(product.getDescription());
-                    tempProduct.setName(product.getName());
-                    return order;
-                })).next();
+        return foundOrder.flatMap(order -> ordersProductsRelationRepository.getAllOrderProducts(order.getId())
+                .collectList()
+                .map(ordersProductsRelationModels -> {
+                    ordersProductsRelationModels.forEach(ordersProductsRelationModel -> {
+                        Product product = new Product();
+                        product.setId(ordersProductsRelationModel.getProductId());
+                        order.getProducts().add(Pair.of(product, ordersProductsRelationModel.getAmount()));
+                    });
+                    return ordersProductsRelationModels;
+                }).flatMap(ordersProductsRelationModels ->
+                        productRepository.findAllById(ordersProductsRelationModels.stream()
+                                .parallel()
+                                .map(OrdersProductsRelationModel::getProductId)
+                                .collect(Collectors.toList()))
+                                .collectList()
+                                .map(products -> {
+                                    order.setProducts(products.stream()
+                                            .map(product -> Pair.of(product, ordersProductsRelationModels.stream()
+                                                    .filter(ordersProductsRelationModel -> ordersProductsRelationModel.getProductId().equals(product.getId()))
+                                                    .findFirst()
+                                                    .orElseThrow(RuntimeException::new)
+                                                    .getAmount()))
+                                            .collect(Collectors.toList()));
+                                    return products;
+                                })).then(Mono.just(order)));
     }
 }
