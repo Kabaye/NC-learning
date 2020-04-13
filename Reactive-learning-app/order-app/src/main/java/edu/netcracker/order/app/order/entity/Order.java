@@ -24,5 +24,5 @@ public class Order {
     @Transient
     private List<Pair<Product, Integer>> products = new ArrayList<>();
     private String customAddress;
-    private Float sumPrice;
+    private Float sumPrice = 0F;
 }

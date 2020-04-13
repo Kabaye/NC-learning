@@ -2,6 +2,7 @@ package edu.netcracker.order.app.order.service;
 
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.repository.OrderRepository;
+import edu.netcracker.order.app.order.utils.OrderUtils;
 import edu.netcracker.order.app.order_product.entity.OrdersProductsRelationModel;
 import edu.netcracker.order.app.order_product.repository.DefaultOrdersProductsRelationRepository;
 import edu.netcracker.order.app.product.entity.Product;
@@ -25,13 +26,22 @@ public class OrderService {
     }
 
     public Mono<Order> saveOrder(Order order) {
-        final Mono<Order> orderMono = orderRepository.save(order);
-        return orderMono.map(ord -> ord.getProducts().stream().parallel()
-                .map(productIntegerPair -> new OrdersProductsRelationModel(null, ord.getId(),
-                        productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
+        return Mono.just(order).flatMap(order1 -> productRepository.findAllById(order1.getProducts().stream()
+                .map(productIntegerPair -> productIntegerPair.getFirst().getId())
                 .collect(Collectors.toList()))
-                .map(ordersProductsRelationRepository::saveOrderProductRelation)
-                .then(orderMono);
+                .map(product -> order1.getProducts().add(Pair.of(product, order.getProducts().stream()
+                        .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(product.getId()))
+                        .findFirst().orElseThrow(RuntimeException::new).getSecond())))
+                .then(Mono.just(order1)))
+                .map(OrderUtils::postProcessOrderSum).flatMap(orderRepository::save)
+                .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
+                        stream().
+                        parallel()
+                        .map(productIntegerPair -> new
+                                OrdersProductsRelationModel(null, ord.getId(),
+                                productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
+                        .collect(Collectors.toList())).
+                        then(Mono.just(ord)));
     }
 
     public Mono<Order> findOrder(Integer id) {
@@ -60,6 +70,6 @@ public class OrderService {
                                                     .getAmount()))
                                             .collect(Collectors.toList()));
                                     return products;
-                                })).then(Mono.just(order)));
+                                })).then(Mono.just(order)).map(OrderUtils::postProcessOrderSum));
     }
 }

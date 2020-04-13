@@ -4,6 +4,8 @@ import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.service.OrderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -18,5 +20,10 @@ public class OrderProductController {
     @GetMapping("/orders/{orderId}")
     public Mono<Order> findOrder(@PathVariable Integer orderId) {
         return orderService.findOrder(orderId);
+    }
+
+    @PostMapping("/orders")
+    public Mono<Order> saveOrder(@RequestBody Order order) {
+        return orderService.saveOrder(order);
     }
 }
