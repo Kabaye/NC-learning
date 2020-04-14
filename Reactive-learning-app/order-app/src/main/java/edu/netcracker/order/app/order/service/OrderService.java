@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 import utils.utils.MoneyUtils;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +23,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final DefaultOrdersProductsRelationRepository ordersProductsRelationRepository;
     private final ProductService productService;
+
+    private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessOrderSum(order, MoneyUtils::convertFromDbPrecision, false);
 
     public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService) {
         this.orderRepository = orderRepository;
@@ -42,7 +46,7 @@ public class OrderService {
                             });
                     return ord;
                 })
-                .then(Mono.just(order)))
+                .then(Mono.just(ord)))
                 .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertToDBPrecision, true))
                 .flatMap(orderRepository::save)
                 .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
@@ -53,22 +57,16 @@ public class OrderService {
                                 productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
                         .collect(Collectors.toList()))
                         .then(Mono.just(ord)))
-                .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertFromDbPrecision, false));
+                .map(postProcessOrderFromDB);
     }
 
     public Mono<Order> updateOrder(Integer id, Order order) {
-        return orderRepository.findById(id).flatMap(ord -> {
-            if (Objects.isNull(ord)) {
-                return Mono.error(new RuntimeException("No such product for provided id."));
-            }
-            order.setId(id);
-            return orderRepository.save(order);
-        });
+        return updateOrder(id, order, false);
     }
 
     public Mono<Order> findOrder(Integer id) {
-        final Mono<Order> foundOrder = orderRepository.findById(id);
-        return foundOrder.flatMap(this::findWithAllDetails);
+        return orderRepository.findById(id)
+                .flatMap(this::findWithAllDetails);
     }
 
     public Flux<Order> findAll() {
@@ -84,7 +82,18 @@ public class OrderService {
         return this.findOrder(orderId)
                 .flatMap(order -> ordersProductsRelationRepository.addProductToOrder(new OrdersProductsRelationModel(null, orderId, productId, amount))
                         .map(ordersProductsRelationModel -> {
-                            order.getProducts().add(Pair.of(new Product(productId, null, null, null), amount));
+                            AtomicBoolean isPresent = new AtomicBoolean(false);
+                            order.getProducts().stream()
+                                    .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(productId))
+                                    .findFirst()
+                                    .ifPresent(productIntegerPair -> {
+                                        order.getProducts().remove(productIntegerPair);
+                                        order.getProducts().add(Pair.of(productIntegerPair.getFirst(), productIntegerPair.getSecond() + amount));
+                                        isPresent.set(true);
+                                    });
+                            if (!isPresent.get()) {
+                                order.getProducts().add(Pair.of(new Product(productId, null, null, null), amount));
+                            }
                             return ordersProductsRelationModel;
                         }).flatMap(ordersProductsRelationModel -> productService.findProductById(productId)
                                 .map(product -> {
@@ -97,21 +106,29 @@ public class OrderService {
                                             });
                                     return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision, true);
                                 })
-                        )).flatMap(order -> updateOrder(orderId, order));
+                        ))
+                .flatMap(order -> updateOrder(orderId, order, true));
     }
 
-    public Mono<Order> deleteProduct(Integer orderId, Integer productId) {
+    public Mono<Order> deleteProduct(Integer orderId, Integer productId, Integer amount) {
         return this.findOrder(orderId)
-                .flatMap(order -> ordersProductsRelationRepository.deleteProductFromOrder(orderId, productId).then(Mono.just(order)))
+                .flatMap(order -> ordersProductsRelationRepository.deleteProductFromOrder(
+                        new OrdersProductsRelationModel(null, orderId, productId, amount))
+                        .then(Mono.just(order)))
                 .flatMap(order -> productService.findProductById(productId)
                         .map(product -> {
                             order.getProducts().stream()
                                     .filter(productIntegerPair -> product.getId().equals(productIntegerPair.getFirst().getId()))
                                     .findAny()
-                                    .ifPresent(productIntegerPair -> order.getProducts().remove(productIntegerPair));
+                                    .ifPresent(productIntegerPair -> {
+                                        order.getProducts().remove(productIntegerPair);
+                                        if (productIntegerPair.getSecond() > amount) {
+                                            order.getProducts().add(Pair.of(productIntegerPair.getFirst(), productIntegerPair.getSecond() - amount));
+                                        }
+                                    });
                             return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision, true);
                         })
-                ).flatMap(order -> updateOrder(orderId, order));
+                ).flatMap(order -> updateOrder(orderId, order, true));
     }
 
     private Mono<? extends Order> findWithAllDetails(Order order) {
@@ -131,7 +148,6 @@ public class OrderService {
                                 .collect(Collectors.toList()))
                                 .collectList()
                                 .map(products -> {
-                                    products.forEach(product -> product.setPrice(MoneyUtils.convertFromDbPrecision(product.getPrice())));
                                     order.setProducts(products.stream()
                                             .map(product -> Pair.of(product, ordersProductsRelationModels.stream()
                                                     .filter(ordersProductsRelationModel -> ordersProductsRelationModel.getProductId().equals(product.getId()))
@@ -141,6 +157,20 @@ public class OrderService {
                                             .collect(Collectors.toList()));
                                     return products;
                                 })).then(Mono.just(order))
-                .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertFromDbPrecision, true));
+                .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertFromDbPrecision, false));
+    }
+
+    private Mono<Order> updateOrder(Integer id, Order order, boolean updateTotalPrice) {
+        return orderRepository.findById(id).flatMap(ord -> {
+            if (Objects.isNull(ord)) {
+                return Mono.error(new RuntimeException("No such product for provided id."));
+            }
+            order.setId(id);
+            if (!updateTotalPrice) {
+                order.setTotalPrice(ord.getTotalPrice());
+            }
+            return orderRepository.save(order)
+                    .map(postProcessOrderFromDB);
+        });
     }
 }

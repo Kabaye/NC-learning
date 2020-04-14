@@ -28,8 +28,18 @@ public class DefaultOrdersProductsRelationRepository {
         return ordersProductsRelationRepository.deleteAllByOrderId(orderId);
     }
 
-    public Mono<Void> deleteProductFromOrder(Integer orderId, Integer productId) {
-        return ordersProductsRelationRepository.deleteByOrderIdAndProductId(orderId, productId);
+    public Mono<?> deleteProductFromOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
+        return ordersProductsRelationRepository.findByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(),
+                ordersProductsRelationModel.getProductId())
+                .flatMap(oprm -> {
+                    if (oprm.getAmount() <= ordersProductsRelationModel.getAmount()) {
+                        return ordersProductsRelationRepository.deleteByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(),
+                                ordersProductsRelationModel.getProductId());
+                    } else {
+                        oprm.setAmount(oprm.getAmount() - ordersProductsRelationModel.getAmount());
+                        return this.updateAmount(oprm);
+                    }
+                });
     }
 
     public Mono<OrdersProductsRelationModel> addProductToOrder(OrdersProductsRelationModel ordersProductsRelationModel) {

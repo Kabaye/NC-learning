@@ -49,7 +49,12 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/delete-product/{productId}")
-    public Mono<Order> deleteProduct(@PathVariable Integer orderId, @PathVariable Integer productId) {
-        return orderService.deleteProduct(orderId, productId);
+    public Mono<Order> deleteProduct(@PathVariable Integer orderId, @PathVariable Integer productId, @RequestParam Integer amount) {
+        return orderService.deleteProduct(orderId, productId, amount);
+    }
+
+    @PutMapping("/{orderId}")
+    public Mono<Order> updateOrder(@PathVariable Integer orderId, @RequestBody Order order) {
+        return orderService.updateOrder(orderId, order);
     }
 }

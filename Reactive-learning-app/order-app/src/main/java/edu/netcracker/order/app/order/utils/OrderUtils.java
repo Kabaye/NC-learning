@@ -11,6 +11,7 @@ public class OrderUtils {
 
     public static Order postProcessOrderSum(Order order, Function<Float, Float> postProcessPrice, boolean calculateTotalPrice) {
         if (calculateTotalPrice) {
+            order.setTotalPrice(0f);
             order.getProducts().forEach(product -> order.setTotalPrice(product.getFirst().getPrice() * product.getSecond() + order.getTotalPrice()));
         }
         order.setTotalPrice(postProcessPrice.apply(order.getTotalPrice()));
