@@ -48,11 +48,17 @@ public class ProductService {
     }
 
     public Mono<Product> updateProduct(Integer id, Product productForUpd) {
-        return findProductById(id).map(product -> new Product(product.getId(), productForUpd.getName(), productForUpd.getDescription(),
-                productForUpd.getPrice())).flatMap(this::saveProduct);
+        return findProductById(id).map(product -> {
+            productForUpd.setId(product.getId());
+            return productForUpd;
+        }).flatMap(this::saveProduct);
     }
 
     public Mono<Void> deleteProduct(Integer id) {
         return productRepository.deleteById(id);
+    }
+
+    public Flux<Product> findAllById(Iterable<Integer> ids) {
+        return productRepository.findAllById(ids).map(moneyFromDB);
     }
 }

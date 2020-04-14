@@ -9,8 +9,10 @@ public class OrderUtils {
     private OrderUtils() {
     }
 
-    public static Order postProcessOrderSum(Order order, Function<Float, Float> postProcessPrice) {
-        order.getProducts().forEach(product -> order.setTotalPrice(product.getFirst().getPrice() * product.getSecond() + order.getTotalPrice()));
+    public static Order postProcessOrderSum(Order order, Function<Float, Float> postProcessPrice, boolean calculateTotalPrice) {
+        if (calculateTotalPrice) {
+            order.getProducts().forEach(product -> order.setTotalPrice(product.getFirst().getPrice() * product.getSecond() + order.getTotalPrice()));
+        }
         order.setTotalPrice(postProcessPrice.apply(order.getTotalPrice()));
         return order;
     }
