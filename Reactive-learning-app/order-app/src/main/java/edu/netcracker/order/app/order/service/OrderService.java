@@ -130,6 +130,7 @@ public class OrderService {
                                 .collect(Collectors.toList()))
                                 .collectList()
                                 .map(products -> {
+                                    products.forEach(product -> product.setPrice(MoneyUtils.convertFromDbPrecision(product.getPrice())));
                                     order.setProducts(products.stream()
                                             .map(product -> Pair.of(product, ordersProductsRelationModels.stream()
                                                     .filter(ordersProductsRelationModel -> ordersProductsRelationModel.getProductId().equals(product.getId()))
