@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.util.Pair;
+import utils.models.Currency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,4 +30,6 @@ public class Order {
     private String customAddress;
     private String customerEmail;
     private Float totalPrice = 0F;
+    @Transient
+    private Currency currency;
 }

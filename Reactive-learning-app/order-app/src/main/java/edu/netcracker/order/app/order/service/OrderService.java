@@ -1,10 +1,12 @@
 package edu.netcracker.order.app.order.service;
 
+import edu.netcracker.order.app.client.CustomerWebClient;
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.repository.OrderRepository;
 import edu.netcracker.order.app.order.utils.OrderUtils;
 import edu.netcracker.order.app.order_product.entity.OrdersProductsRelationModel;
 import edu.netcracker.order.app.order_product.repository.DefaultOrdersProductsRelationRepository;
+import edu.netcracker.order.app.order_product.repository.OrdersProductsRelationRepository;
 import edu.netcracker.order.app.product.entity.Product;
 import edu.netcracker.order.app.product.service.ProductService;
 import org.springframework.data.util.Pair;
@@ -22,18 +24,29 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final DefaultOrdersProductsRelationRepository ordersProductsRelationRepository;
+    private final OrdersProductsRelationRepository repository;
     private final ProductService productService;
+    private final CustomerWebClient customerWebClient;
 
     private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessOrderSum(order, MoneyUtils::convertFromDbPrecision, false);
 
-    public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService) {
+    public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, OrdersProductsRelationRepository repository, ProductService productService, CustomerWebClient customerWebClient) {
         this.orderRepository = orderRepository;
         this.ordersProductsRelationRepository = ordersProductsRelationRepository;
+        this.repository = repository;
         this.productService = productService;
+        this.customerWebClient = customerWebClient;
     }
 
     public Mono<Order> saveOrder(Order order) {
-        return Mono.just(order).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
+        return Mono.just(order).flatMap(ord -> customerWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                .map(customer -> {
+                    if (Objects.isNull(customer)) {
+                        throw new RuntimeException("No such customer with email: " + ord.getCustomerEmail());
+                    }
+                    ord.setCurrency(customer.getCurrency());
+                    return ord;
+                })).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
                 .map(productIntegerPair -> productIntegerPair.getFirst().getId())
                 .collect(Collectors.toList()))
                 .map(product -> {
@@ -75,7 +88,8 @@ public class OrderService {
     }
 
     public Mono<Void> deleteOrder(Integer id) {
-        return ordersProductsRelationRepository.deleteOrderProductsRelation(id).then(orderRepository.deleteById(id));
+        return repository.findAllByOrderId(id).collectList().flatMap(repository::deleteAll)
+                .then(orderRepository.deleteById(id));
     }
 
     public Mono<Order> addProduct(Integer orderId, Integer productId, Integer amount) {
