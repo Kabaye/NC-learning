@@ -5,5 +5,5 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 
 public interface CustomerRepository extends ReactiveCrudRepository<Customer, Integer> {
-    Mono<Customer> findCustomerByEmail(String email);
+    Mono<Customer> findByEmail(String email);
 }

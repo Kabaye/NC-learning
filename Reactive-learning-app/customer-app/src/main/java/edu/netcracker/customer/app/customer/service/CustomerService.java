@@ -37,6 +37,6 @@ public class CustomerService {
     }
 
     public Mono<Customer> findCustomerByEmail(String email) {
-        return customerRepository.findCustomerByEmail(email);
+        return customerRepository.findByEmail(email);
     }
 }

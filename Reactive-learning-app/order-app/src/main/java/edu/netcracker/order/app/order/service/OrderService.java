@@ -41,9 +41,6 @@ public class OrderService {
     public Mono<Order> saveOrder(Order order) {
         return Mono.just(order).flatMap(ord -> customerWebClient.getCustomerByEmail(ord.getCustomerEmail())
                 .map(customer -> {
-                    if (Objects.isNull(customer)) {
-                        throw new RuntimeException("No such customer with email: " + ord.getCustomerEmail());
-                    }
                     ord.setCurrency(customer.getCurrency());
                     return ord;
                 })).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
