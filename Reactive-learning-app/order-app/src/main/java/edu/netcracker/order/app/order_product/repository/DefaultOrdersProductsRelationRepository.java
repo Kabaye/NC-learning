@@ -24,8 +24,8 @@ public class DefaultOrdersProductsRelationRepository {
         return ordersProductsRelationRepository.findAllByOrderId(orderId);
     }
 
-    public Mono<Void> deleteOrderProductsRelation(Integer orderId) {
-        return ordersProductsRelationRepository.deleteAllByOrderId(orderId);
+    public Mono<Void> deleteAll(Iterable<OrdersProductsRelationModel> iterable) {
+        return ordersProductsRelationRepository.deleteAll(iterable);
     }
 
     public Mono<?> deleteProductFromOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
