@@ -1,6 +1,7 @@
 package edu.netcracker.order.app.order.controller;
 
 import edu.netcracker.order.app.order.entity.Order;
+import edu.netcracker.order.app.order.entity.OrderRequestModel;
 import edu.netcracker.order.app.order.service.OrderService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,8 +35,8 @@ public class OrderController {
     }
 
     @PostMapping
-    public Mono<Order> saveOrder(@RequestBody Order order) {
-        return orderService.saveOrder(order);
+    public Mono<Order> saveOrder(@RequestBody OrderRequestModel orderRequestModel) {
+        return orderService.saveOrder(Order.of(orderRequestModel));
     }
 
     @DeleteMapping("/{orderId}")
@@ -54,7 +55,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}")
-    public Mono<Order> updateOrder(@PathVariable Integer orderId, @RequestBody Order order) {
-        return orderService.updateOrder(orderId, order);
+    public Mono<Order> updateOrder(@PathVariable Integer orderId, @RequestBody OrderRequestModel orderRequestModel) {
+        return orderService.updateOrder(orderId, Order.of(orderRequestModel));
     }
 }

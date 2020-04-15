@@ -1,6 +1,6 @@
 package edu.netcracker.order.app.order.service;
 
-import edu.netcracker.order.app.client.CustomerWebClient;
+import edu.netcracker.order.app.client.DefaultWebClient;
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.repository.OrderRepository;
 import edu.netcracker.order.app.order.utils.OrderUtils;
@@ -12,10 +12,15 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import utils.models.Currency;
 import utils.utils.MoneyUtils;
 
+import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,19 +29,25 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final DefaultOrdersProductsRelationRepository ordersProductsRelationRepository;
     private final ProductService productService;
-    private final CustomerWebClient customerWebClient;
+    private final DefaultWebClient defaultWebClient;
+    private final AtomicReference<Pair<Map<Currency, Double>, Currency>> rates = new AtomicReference<>();
 
     private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessOrderSum(order, MoneyUtils::convertFromDbPrecision, false);
 
-    public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService, CustomerWebClient customerWebClient) {
+    public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService, DefaultWebClient defaultWebClient) {
         this.orderRepository = orderRepository;
         this.ordersProductsRelationRepository = ordersProductsRelationRepository;
         this.productService = productService;
-        this.customerWebClient = customerWebClient;
+        this.defaultWebClient = defaultWebClient;
+
+        Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(15), Schedulers.single())
+                .flatMap(obj -> defaultWebClient.getCurrentExchangeRates())
+                .doOnNext(rates::set)
+                .subscribe();
     }
 
     public Mono<Order> saveOrder(Order order) {
-        return Mono.just(order).flatMap(ord -> customerWebClient.getCustomerByEmail(ord.getCustomerEmail())
+        return Mono.just(order).flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
                 .map(customer -> {
                     ord.setCurrency(customer.getCurrency());
                     return ord;
