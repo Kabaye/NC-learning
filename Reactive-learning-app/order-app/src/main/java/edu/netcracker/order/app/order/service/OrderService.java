@@ -41,11 +41,13 @@ public class OrderService {
         this.productService = productService;
         this.defaultWebClient = defaultWebClient;
 
-        Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(15), Schedulers.single())
+        Flux.interval(Duration.ofSeconds(0), Duration.ofHours(3), Schedulers.single())
                 .flatMap(obj -> defaultWebClient.getCurrentExchangeRates())
                 .doOnNext(rates::set)
                 .subscribe();
     }
+
+    /* Public */
 
     public Mono<Order> saveOrder(Order order) {
         return Mono.just(order)
@@ -169,6 +171,8 @@ public class OrderService {
                         })
                 ).flatMap(order -> updateOrder(orderId, order, true));
     }
+
+    /* Private */
 
     private Mono<? extends Order> findWithAllDetails(Order order) {
         return ordersProductsRelationRepository.getAllOrderProducts(order.getId())
