@@ -10,6 +10,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Currency;
 
 @Component
 public class OrderSerializer extends JsonSerializer<Order> {
@@ -34,7 +35,7 @@ public class OrderSerializer extends JsonSerializer<Order> {
             gen.writeEndObject();
         }
         gen.writeEndArray();
-        gen.writeNumberField("totalPrice", value.getTotalPrice());
+        gen.writeStringField("totalPrice", String.format("%.2f" + Currency.getInstance(value.getCurrency().name()).getSymbol(), value.getTotalPrice()));
         gen.writeEndObject();
     }
 }

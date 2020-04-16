@@ -32,7 +32,8 @@ public class OrderService {
     private final DefaultWebClient defaultWebClient;
     private final AtomicReference<Pair<Map<Currency, Double>, Currency>> rates = new AtomicReference<>();
 
-    private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessOrderSum(order, MoneyUtils::convertFromDbPrecision, false);
+    private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessTotalPriceValue(order, MoneyUtils::convertFromDbPrecision, false);
+    private final Function<Order, Order> postProcessTotalPriceToCustomerCurrency = order -> OrderUtils.postProcessTotalPriceCurrency(order, rates.get().getFirst());
 
     public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService, DefaultWebClient defaultWebClient) {
         this.orderRepository = orderRepository;
@@ -47,25 +48,26 @@ public class OrderService {
     }
 
     public Mono<Order> saveOrder(Order order) {
-        return Mono.just(order).flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
-                .map(customer -> {
-                    ord.setCurrency(customer.getCurrency());
-                    return ord;
-                })).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
-                .map(productIntegerPair -> productIntegerPair.getFirst().getId())
-                .collect(Collectors.toList()))
-                .map(product -> {
-                    ord.getProducts().stream()
-                            .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(product.getId()))
-                            .forEach(productIntegerPair -> {
-                                productIntegerPair.getFirst().setPrice(product.getPrice());
-                                productIntegerPair.getFirst().setName(product.getName());
-                                productIntegerPair.getFirst().setDescription(product.getDescription());
-                            });
-                    return ord;
-                })
-                .then(Mono.just(ord)))
-                .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertToDBPrecision, true))
+        return Mono.just(order)
+                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                        .map(customer -> {
+                            ord.setCurrency(customer.getCurrency());
+                            return ord;
+                        })).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
+                        .map(productIntegerPair -> productIntegerPair.getFirst().getId())
+                        .collect(Collectors.toList()))
+                        .map(product -> {
+                            ord.getProducts().stream()
+                                    .filter(productIntegerPair -> productIntegerPair.getFirst().getId().equals(product.getId()))
+                                    .forEach(productIntegerPair -> {
+                                        productIntegerPair.getFirst().setPrice(product.getPrice());
+                                        productIntegerPair.getFirst().setName(product.getName());
+                                        productIntegerPair.getFirst().setDescription(product.getDescription());
+                                    });
+                            return ord;
+                        })
+                        .then(Mono.just(ord)))
+                .map(ord -> OrderUtils.postProcessTotalPriceValue(ord, MoneyUtils::convertToDBPrecision, true))
                 .flatMap(orderRepository::save)
                 .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
                         stream().
@@ -75,7 +77,8 @@ public class OrderService {
                                 productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
                         .collect(Collectors.toList()))
                         .then(Mono.just(ord)))
-                .map(postProcessOrderFromDB);
+                .map(postProcessOrderFromDB)
+                .map(postProcessTotalPriceToCustomerCurrency);
     }
 
     public Mono<Order> updateOrder(Integer id, Order order) {
@@ -84,11 +87,21 @@ public class OrderService {
 
     public Mono<Order> findOrder(Integer id) {
         return orderRepository.findById(id)
+                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                        .map(customer -> {
+                            ord.setCurrency(customer.getCurrency());
+                            return ord;
+                        }))
                 .flatMap(this::findWithAllDetails);
     }
 
     public Flux<Order> findAll() {
         return orderRepository.findAll()
+                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                        .map(customer -> {
+                            ord.setCurrency(customer.getCurrency());
+                            return ord;
+                        }))
                 .flatMap(this::findWithAllDetails);
     }
 
@@ -125,7 +138,7 @@ public class OrderService {
                                                 productIntegerPair.getFirst().setDescription(product.getDescription());
                                                 productIntegerPair.getFirst().setPrice(product.getPrice());
                                             });
-                                    return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision, true);
+                                    return OrderUtils.postProcessTotalPriceValue(order, MoneyUtils::convertToDBPrecision, true);
                                 })
                         ))
                 .flatMap(order -> updateOrder(orderId, order, true));
@@ -133,6 +146,11 @@ public class OrderService {
 
     public Mono<Order> deleteProduct(Integer orderId, Integer productId, Integer amount) {
         return this.findOrder(orderId)
+                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                        .map(customer -> {
+                            ord.setCurrency(customer.getCurrency());
+                            return ord;
+                        }))
                 .flatMap(order -> ordersProductsRelationRepository.deleteProductFromOrder(
                         new OrdersProductsRelationModel(null, orderId, productId, amount))
                         .then(Mono.just(order)))
@@ -147,7 +165,7 @@ public class OrderService {
                                             order.getProducts().add(Pair.of(productIntegerPair.getFirst(), productIntegerPair.getSecond() - amount));
                                         }
                                     });
-                            return OrderUtils.postProcessOrderSum(order, MoneyUtils::convertToDBPrecision, true);
+                            return OrderUtils.postProcessTotalPriceValue(order, MoneyUtils::convertToDBPrecision, true);
                         })
                 ).flatMap(order -> updateOrder(orderId, order, true));
     }
@@ -178,20 +196,28 @@ public class OrderService {
                                             .collect(Collectors.toList()));
                                     return products;
                                 })).then(Mono.just(order))
-                .map(ord -> OrderUtils.postProcessOrderSum(ord, MoneyUtils::convertFromDbPrecision, false));
+                .map(postProcessOrderFromDB)
+                .map(postProcessTotalPriceToCustomerCurrency);
     }
 
     private Mono<Order> updateOrder(Integer id, Order order, boolean updateTotalPrice) {
-        return orderRepository.findById(id).flatMap(ord -> {
-            if (Objects.isNull(ord)) {
-                return Mono.error(new RuntimeException("No such product for provided id."));
-            }
-            order.setId(id);
-            if (!updateTotalPrice) {
-                order.setTotalPrice(ord.getTotalPrice());
-            }
-            return orderRepository.save(order)
-                    .map(postProcessOrderFromDB);
-        });
+        return orderRepository.findById(id)
+                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
+                        .map(customer -> {
+                            ord.setCurrency(customer.getCurrency());
+                            return ord;
+                        }))
+                .flatMap(ord -> {
+                    if (Objects.isNull(ord)) {
+                        return Mono.error(new RuntimeException("No such product for provided id."));
+                    }
+                    order.setId(id);
+                    if (!updateTotalPrice) {
+                        order.setTotalPrice(ord.getTotalPrice());
+                    }
+                    return orderRepository.save(order)
+                            .map(postProcessOrderFromDB)
+                            .map(postProcessTotalPriceToCustomerCurrency);
+                });
     }
 }
