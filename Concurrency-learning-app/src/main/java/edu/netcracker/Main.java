@@ -1,5 +1,8 @@
 package edu.netcracker;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -11,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
-        test3();
+        test4();
     }
 
     private static void test1() throws InterruptedException {
@@ -98,5 +101,37 @@ public class Main {
         System.out.println("done? " + futureResult.isDone());
 
         System.out.println("res " + res);
+    }
+
+    private static void test4() throws InterruptedException {
+        ExecutorService executorService = Executors.newWorkStealingPool();
+        Random random = new Random(System.currentTimeMillis());
+
+        List<Callable<String>> callables = Arrays.asList(
+                () -> {
+                    final byte[] bytes = new byte[10];
+                    random.nextBytes(bytes);
+                    return new String(bytes, StandardCharsets.UTF_8);
+                },
+                () -> {
+                    final byte[] bytes = new byte[10];
+                    random.nextBytes(bytes);
+                    return new String(bytes, StandardCharsets.UTF_8);
+                },
+                () -> {
+                    final byte[] bytes = new byte[10];
+                    random.nextBytes(bytes);
+                    return new String(bytes, StandardCharsets.UTF_8);
+                }
+        );
+        executorService.invokeAll(callables)
+                .forEach(stringFuture -> {
+                    try {
+                        String s = stringFuture.get();
+                        System.out.println("123  " + s);
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }
