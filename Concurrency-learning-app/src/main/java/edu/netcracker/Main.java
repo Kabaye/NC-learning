@@ -9,12 +9,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
-        test4();
+        test5();
     }
 
     private static void test1() throws InterruptedException {
@@ -133,5 +135,39 @@ public class Main {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    private static void test5() throws InterruptedException {
+        long initialTime = System.currentTimeMillis();
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        Runnable task = () -> System.out.println("Scheduling 1: " + (System.currentTimeMillis() - initialTime));
+        ScheduledFuture<?> future = scheduledExecutorService.schedule(task, 3, TimeUnit.SECONDS);
+
+        TimeUnit.MILLISECONDS.sleep(1500);
+
+        long remainingDelay = future.getDelay(TimeUnit.MILLISECONDS);
+        System.out.println(String.format("Remaining Delay: %dms", remainingDelay));
+
+        Runnable task2 = () -> System.out.println("Scheduling 2: " + (System.currentTimeMillis() - initialTime));
+
+        int initialDelay = 0;
+        int period = 1;
+
+        //не учитывает время работы процесса
+        scheduledExecutorService.scheduleAtFixedRate(task2, initialDelay, period, TimeUnit.SECONDS);
+
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+        Runnable task3 = () -> {
+            try {
+                TimeUnit.SECONDS.sleep(2);
+                System.out.println("Scheduling 3: " + (System.currentTimeMillis() - initialTime));
+            } catch (InterruptedException e) {
+                System.err.println("task interrupted");
+            }
+        };
+        //учитывает время работы процесса
+        executor.scheduleWithFixedDelay(task3, 0, 1, TimeUnit.SECONDS);
     }
 }
