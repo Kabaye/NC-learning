@@ -346,7 +346,7 @@ public class Test {
         long curTime = System.currentTimeMillis();
 
         var ref = new Object() {
-            final int count = 0;
+            int count = 0;
         };
 
         ExecutorService executorService = Executors.newWorkStealingPool();
