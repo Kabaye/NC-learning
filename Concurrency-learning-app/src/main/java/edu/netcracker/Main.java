@@ -2,7 +2,9 @@ package edu.netcracker;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -13,11 +15,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
-        test5();
-    }
+    ReentrantLock reentrantLock2 = new ReentrantLock();
 
     private static void test1() throws InterruptedException {
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -169,5 +173,143 @@ public class Main {
         };
         //учитывает время работы процесса
         executor.scheduleWithFixedDelay(task3, 0, 1, TimeUnit.SECONDS);
+    }
+
+    ReentrantLock reentrantLock3 = new ReentrantLock();
+    private int field;
+    private int field2;
+    private int field3;
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
+        new Main().test10();
+    }
+
+    private void test6() {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        for (int i = 0; i < 10_000; i++) {
+            executorService.submit(this::incrementWithSync);
+        }
+
+        ConcurrencyUtils.stop(executorService);
+
+        System.out.println("f: " + field);
+    }
+
+    private /*synchronized*/ void incrementWithSync() {
+        synchronized (this) {
+            field++;
+        }
+    }
+
+    private void test7() {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        for (int i = 0; i < 10_000; i++) {
+            executorService.submit(this::incrementWithLock);
+        }
+
+        ConcurrencyUtils.stop(executorService);
+
+        System.out.println("f: " + field2);
+    }
+
+    private void incrementWithLock() {
+        reentrantLock2.lock();
+        try {
+            field2++;
+        } finally {
+            reentrantLock2.unlock();
+        }
+    }
+
+    private void test8() {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            reentrantLock3.lock();
+            try {
+                ConcurrencyUtils.sleep(5);
+            } finally {
+                reentrantLock3.unlock();
+            }
+        });
+
+        executor.submit(() -> {
+            System.out.println("Locked: " + reentrantLock3.isLocked());
+            System.out.println("Held by me: " + reentrantLock3.isHeldByCurrentThread());
+            boolean locked = reentrantLock3.tryLock();
+            System.out.println("Lock acquired: " + locked);
+        });
+
+        ConcurrencyUtils.stop(executor);
+    }
+
+    private void test9() {
+        long startTime = System.currentTimeMillis();
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Map<String, String> map = new HashMap<>();
+        ReadWriteLock lock = new ReentrantReadWriteLock();
+
+        executor.submit(() -> {
+            lock.writeLock().lock();
+            try {
+                ConcurrencyUtils.sleep(1);
+                map.put("123", "456");
+            } finally {
+                lock.writeLock().unlock();
+            }
+        });
+
+        Runnable readTask = () -> {
+            lock.readLock().lock();
+            try {
+                System.out.println("Cur Thr: " + Thread.currentThread().getName() + "; curtime: " + (System.currentTimeMillis() - startTime) + "; value: " + map.get("123"));
+                ConcurrencyUtils.sleep(1);
+            } finally {
+                lock.readLock().unlock();
+            }
+        };
+        System.out.println("curtime start: " + (System.currentTimeMillis() - startTime));
+        executor.submit(readTask);
+        executor.submit(readTask);
+        executor.submit(readTask);
+        executor.submit(readTask);
+
+        ConcurrencyUtils.stop(executor);
+    }
+
+    private void test10() {
+        long startTime = System.currentTimeMillis();
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        Map<String, Integer> map = new HashMap<>();
+        StampedLock stampedLock = new StampedLock();
+
+        executorService.submit(() -> {
+            long stamp = stampedLock.writeLock();
+            try {
+                ConcurrencyUtils.sleep(3);
+                map.put("123456", 123456);
+            } finally {
+                stampedLock.unlockWrite(stamp);
+            }
+        });
+
+        Runnable readTask = () -> {
+            long stamp = stampedLock.readLock();
+            try {
+                System.out.println("Cur Thr: " + Thread.currentThread().getName() + "; curtime: " + (System.currentTimeMillis() - startTime) + "; value: " + map.get("123"));
+                ConcurrencyUtils.sleep(2);
+            } finally {
+                stampedLock.unlockRead(stamp);
+            }
+        };
+
+        executorService.submit(readTask);
+        executorService.submit(readTask);
+        executorService.submit(readTask);
+        executorService.submit(readTask);
+
+        ConcurrencyUtils.stop(executorService);
     }
 }
