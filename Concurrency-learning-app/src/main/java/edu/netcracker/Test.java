@@ -7,19 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
+import java.util.stream.IntStream;
 
 import static edu.netcracker.ConcurrencyUtils.sleep;
 import static edu.netcracker.ConcurrencyUtils.stop;
@@ -420,5 +424,41 @@ public class Test {
         }
 
         stop(executorService);
+    }
+
+    void test14() {
+        AtomicInteger atomicInt = new AtomicInteger(0);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        IntStream.range(0, 100_000)
+                .forEach(i -> executor.submit(atomicInt::incrementAndGet));
+
+        stop(executor);
+
+        System.out.println(atomicInt.get());
+    }
+
+    void test15() {
+        ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+        map.put("foo", "bar");
+        map.put("han", "solo");
+        map.put("r2", "d2");
+        map.put("c3", "p0");
+
+        System.out.println(ForkJoinPool.getCommonPoolParallelism());
+
+        String result = map.reduce(1,
+                (key, value) -> {
+                    System.out.println("Transform: " + Thread.currentThread().getName());
+                    return key + "=" + value;
+                },
+                (s1, s2) -> {
+                    System.out.println("Reduce: " + Thread.currentThread().getName());
+                    return s1 + ", " + s2;
+                });
+
+        System.out.println("Result: " + result);
+        System.out.println("Result: " + result);
     }
 }
