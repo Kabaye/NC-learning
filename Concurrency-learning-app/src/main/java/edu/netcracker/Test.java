@@ -399,7 +399,7 @@ public class Test {
         Runnable longTask = () -> {
             boolean permission = false;
             try {
-                permission = semaphore.tryAcquire(1500, TimeUnit.MILLISECONDS);
+                permission = semaphore.tryAcquire(1000, TimeUnit.MILLISECONDS);
                 if (permission) {
                     System.out.println("sem acquired");
                     sleep(5);
