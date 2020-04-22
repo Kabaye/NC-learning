@@ -5,3 +5,15 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/CUSTOMER-APP
     username: postgres
+
+management:
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: beans,caches,health,httptrace,info,metrics,mappings,sessions,shutdown,threaddump,env
+      base-path: /monitor
