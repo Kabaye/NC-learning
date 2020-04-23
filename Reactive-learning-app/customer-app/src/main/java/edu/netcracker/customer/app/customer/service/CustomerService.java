@@ -15,7 +15,8 @@ public class CustomerService {
     }
 
     public Mono<Customer> findCustomerById(Integer id) {
-        return customerRepository.findById(id);
+        return customerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("No such customer with id: " + id)));
     }
 
     public Flux<Customer> findAllCustomers() {
@@ -27,8 +28,9 @@ public class CustomerService {
     }
 
     public Mono<Customer> updateCustomer(Integer id, Customer customerForUpd) {
-        return customerRepository.findById(id).map(customer ->
-                new Customer(customer.getId(), customerForUpd.getEmail(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
+        return customerRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("No such customer with id: " + id)))
+                .map(customer -> new Customer(customer.getId(), customerForUpd.getEmail(), customerForUpd.getName(), customerForUpd.getAddress(), customerForUpd.getCurrency()))
                 .flatMap(customerRepository::save);
     }
 
