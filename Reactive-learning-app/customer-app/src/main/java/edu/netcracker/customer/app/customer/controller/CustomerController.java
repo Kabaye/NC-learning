@@ -2,6 +2,7 @@ package edu.netcracker.customer.app.customer.controller;
 
 import edu.netcracker.customer.app.customer.entity.Customer;
 import edu.netcracker.customer.app.customer.service.CustomerService;
+import edu.netcracker.customer.app.metrics.annotations.RegistrationMetricsAnnotation;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,11 +39,13 @@ public class CustomerController {
     }
 
     @PostMapping
+    @RegistrationMetricsAnnotation
     public Mono<Customer> saveCustomer(@RequestBody Customer customer) {
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
+    @RegistrationMetricsAnnotation
     public Mono<Customer> updateCustomer(@PathVariable Integer id, @RequestBody(required = false) Customer customer) {
         return customerService.updateCustomer(id, customer);
     }

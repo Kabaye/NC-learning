@@ -114,6 +114,7 @@
         <module>customer-app</module>
         <module>order-app</module>
         <module>utils</module>
+        <module>metrics</module>
     </modules>
 
 </project>
