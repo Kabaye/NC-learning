@@ -1,4 +1,4 @@
-package edu.netcracker.customer.app.metrics.annotations;
+package edu.netcracker.common.metrics.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(value = ElementType.METHOD)
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface DeletingMetricsAnnotation {
+public @interface InteractingMetricAnnotations {
 }

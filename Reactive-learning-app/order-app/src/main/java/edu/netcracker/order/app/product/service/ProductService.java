@@ -1,11 +1,11 @@
 package edu.netcracker.order.app.product.service;
 
+import edu.netcracker.common.currency.utils.MoneyUtils;
 import edu.netcracker.order.app.product.entity.Product;
 import edu.netcracker.order.app.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import utils.utils.MoneyUtils;
 
 import java.util.Objects;
 import java.util.function.Function;

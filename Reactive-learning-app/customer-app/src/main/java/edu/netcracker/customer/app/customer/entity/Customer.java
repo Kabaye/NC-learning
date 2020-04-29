@@ -1,11 +1,11 @@
 package edu.netcracker.customer.app.customer.entity;
 
+import edu.netcracker.common.currency.model.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import utils.models.Currency;
 
 @Data
 @AllArgsConstructor

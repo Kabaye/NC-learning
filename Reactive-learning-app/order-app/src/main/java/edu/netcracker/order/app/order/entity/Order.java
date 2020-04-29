@@ -1,6 +1,7 @@
 package edu.netcracker.order.app.order.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import edu.netcracker.common.currency.model.Currency;
 import edu.netcracker.order.app.order.utils.OrderSerializer;
 import edu.netcracker.order.app.product.entity.Product;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.util.Pair;
-import utils.models.Currency;
 
 import java.util.ArrayList;
 import java.util.List;

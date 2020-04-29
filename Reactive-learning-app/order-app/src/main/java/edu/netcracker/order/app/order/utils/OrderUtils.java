@@ -1,9 +1,9 @@
 package edu.netcracker.order.app.order.utils;
 
 
+import edu.netcracker.common.currency.model.Currency;
+import edu.netcracker.common.currency.utils.MoneyUtils;
 import edu.netcracker.order.app.order.entity.Order;
-import utils.models.Currency;
-import utils.utils.MoneyUtils;
 
 import java.util.Map;
 import java.util.function.Function;

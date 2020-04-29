@@ -2,7 +2,6 @@ package edu.netcracker.order.app.order.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.product.entity.Product;
@@ -14,13 +13,6 @@ import java.util.Currency;
 
 @Component
 public class OrderSerializer extends JsonSerializer<Order> {
-
-    private final ObjectMapper objectMapper;
-
-    public OrderSerializer(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
     public void serialize(Order value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();

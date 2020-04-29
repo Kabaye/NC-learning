@@ -1,5 +1,7 @@
 package edu.netcracker.order.app.order.service;
 
+import edu.netcracker.common.currency.model.Currency;
+import edu.netcracker.common.currency.utils.MoneyUtils;
 import edu.netcracker.order.app.client.DefaultWebClient;
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.repository.OrderRepository;
@@ -13,8 +15,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import utils.models.Currency;
-import utils.utils.MoneyUtils;
 
 import java.time.Duration;
 import java.util.Map;

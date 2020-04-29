@@ -1,4 +1,4 @@
-package utils.models;
+package edu.netcracker.common.currency.model;
 
 public enum Currency {
     USD,

@@ -1,4 +1,4 @@
-package utils.utils;
+package edu.netcracker.common.currency.utils;
 
 public class MoneyUtils {
     private MoneyUtils() {

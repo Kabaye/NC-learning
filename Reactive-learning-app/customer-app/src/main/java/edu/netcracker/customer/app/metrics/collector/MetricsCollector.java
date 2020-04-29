@@ -1,11 +1,11 @@
 package edu.netcracker.customer.app.metrics.collector;
 
-import edu.netcracker.customer.app.metrics.model.MetricsData;
-import edu.netcracker.customer.app.metrics.model.MetricsType;
+import edu.netcracker.metrics.models.MetricData;
+import edu.netcracker.metrics.models.MetricType;
 
 
 public interface MetricsCollector {
-    void saveSuccessfulMetrics(MetricsType metricsType, MetricsData metricsData);
+    void saveSuccessfulMetrics(MetricType metricType, MetricData metricData);
 
-    void saveErrorMetrics(MetricsType metricsType, MetricsData metricsData);
+    void saveErrorMetrics(MetricType metricType, MetricData metricData);
 }

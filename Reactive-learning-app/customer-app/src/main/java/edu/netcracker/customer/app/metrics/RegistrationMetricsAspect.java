@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 @Aspect
 public class RegistrationMetricsAspect {
 
-    @Around("@annotation(edu.netcracker.customer.app.metrics.annotations.RegistrationMetricsAnnotation)")
+    @Around("@annotation(edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation)")
     @SneakyThrows
     public Object aroundRegistration(ProceedingJoinPoint joinPoint) {
         Object result = joinPoint.proceed();

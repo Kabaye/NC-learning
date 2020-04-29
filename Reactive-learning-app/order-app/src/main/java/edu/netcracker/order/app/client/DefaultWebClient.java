@@ -3,6 +3,7 @@ package edu.netcracker.order.app.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.netcracker.common.currency.model.Currency;
 import edu.netcracker.order.app.order.entity.Customer;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import utils.models.Currency;
 
 import java.util.Arrays;
 import java.util.HashMap;

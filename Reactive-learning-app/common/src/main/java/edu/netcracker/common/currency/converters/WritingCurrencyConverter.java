@@ -1,9 +1,9 @@
-package utils.converters;
+package edu.netcracker.common.currency.converters;
 
+import edu.netcracker.common.currency.model.Currency;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.stereotype.Component;
-import utils.models.Currency;
 
 @WritingConverter
 @Component

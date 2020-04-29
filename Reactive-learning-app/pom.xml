@@ -74,9 +74,10 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>edu.netcracker</groupId>
-            <artifactId>utils</artifactId>
+            <artifactId>common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
@@ -113,7 +114,7 @@
     <modules>
         <module>customer-app</module>
         <module>order-app</module>
-        <module>utils</module>
+        <module>common</module>
         <module>metrics</module>
     </modules>
 
