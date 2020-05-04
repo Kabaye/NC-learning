@@ -1,8 +1,10 @@
 package edu.netcracker.customer.app.metrics;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.netcracker.common.metrics.models.ErrorMetricData;
 import edu.netcracker.common.metrics.models.MetricData;
 import edu.netcracker.common.metrics.models.SuccessfulMetricData;
+import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,7 +15,7 @@ import reactor.core.publisher.Mono;
 class MetricsWebClient {
     private final WebClient metricWebClient;
 
-    MetricsWebClient(WebClient.Builder webClientBuilder) {
+    MetricsWebClient(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.metricWebClient = webClientBuilder.baseUrl("http://localhost:8665/api/v1/metrics")
                 .build();
     }
@@ -22,6 +24,11 @@ class MetricsWebClient {
         return sendMetric("/successful", successfulMetricData);
     }
 
+    public Mono<Void> collectErrorMetric(ErrorMetricData errorMetricData) {
+        return sendMetric("/error", errorMetricData);
+    }
+
+    @SneakyThrows
     private Mono<Void> sendMetric(String path, MetricData metricData) {
         return metricWebClient.post()
                 .uri(UriComponentsBuilder.newInstance()
@@ -35,9 +42,5 @@ class MetricsWebClient {
                     return clientResponse.bodyToMono(Exception.class);
                 }).toBodilessEntity()
                 .then(Mono.empty());
-    }
-
-    public Mono<Void> collectErrorMetric(ErrorMetricData errorMetricData) {
-        return sendMetric("/error", errorMetricData);
     }
 }

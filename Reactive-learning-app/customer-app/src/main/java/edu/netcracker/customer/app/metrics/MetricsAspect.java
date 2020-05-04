@@ -24,28 +24,31 @@ public class MetricsAspect {
         this.metricsWebClient = metricsWebClient;
     }
 
-    @Around("@annotation(edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation)")
     @SneakyThrows
+    @Around("@annotation(edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation)")
     public Object aroundRegistration(ProceedingJoinPoint joinPoint) {
-        Instant instant = Instant.now();
-        Object result = joinPoint.proceed();
-        if (result instanceof Mono<?>) {
-            return addMetricIntermediateOperation(instant, MetricType.REGISTRATION, ((Mono<?>) result));
-        } else if (result instanceof Flux<?>) {
-            return addMetricIntermediateOperation(instant, MetricType.REGISTRATION, ((Flux<?>) result).collectList());
-        }
-        return result;
+        return doAround(joinPoint, MetricType.REGISTRATION);
     }
 
-    @Around("@annotation(edu.netcracker.common.metrics.annotations.DeletingMetricAnnotation)")
     @SneakyThrows
+    @Around("@annotation(edu.netcracker.common.metrics.annotations.InteractingMetricAnnotation)")
+    public Object aroundInteracting(ProceedingJoinPoint joinPoint) {
+        return doAround(joinPoint, MetricType.INTERACTING);
+    }
+
+    @SneakyThrows
+    @Around("@annotation(edu.netcracker.common.metrics.annotations.DeletingMetricAnnotation)")
     public Object aroundDeleting(ProceedingJoinPoint joinPoint) {
+        return doAround(joinPoint, MetricType.DELETING);
+    }
+
+    private Object doAround(ProceedingJoinPoint joinPoint, MetricType registration) throws Throwable {
         Instant instant = Instant.now();
         Object result = joinPoint.proceed();
         if (result instanceof Mono<?>) {
-            return addMetricIntermediateOperation(instant, MetricType.DELETING, ((Mono<?>) result));
+            return addMetricIntermediateOperation(instant, registration, ((Mono<?>) result));
         } else if (result instanceof Flux<?>) {
-            return addMetricIntermediateOperation(instant, MetricType.DELETING, ((Flux<?>) result).collectList());
+            return addMetricIntermediateOperation(instant, registration, ((Flux<?>) result).collectList());
         }
         return result;
     }
@@ -53,27 +56,21 @@ public class MetricsAspect {
     private Mono<?> addMetricIntermediateOperation(Instant instant, MetricType metricType, Mono<?> result) {
         return result
                 /* on success send success metric */
-                .flatMap(o -> {
-                    System.out.println(metricType.name() + " success");
-                    return metricsWebClient.collectSuccessfulMetric(SuccessfulMetricData.builder()
-                            .endTimeOfProcess(Instant.now())
-                            .startTimeOfProcess(instant)
-                            .metricType(metricType)
-                            .microserviceId(microserviceId)
-                            .build())
-                            .then(Mono.just(o));
-                })
+                .doOnSuccess(o -> metricsWebClient.collectSuccessfulMetric(SuccessfulMetricData.builder()
+                        .endTimeOfProcess(Instant.now())
+                        .startTimeOfProcess(instant)
+                        .metricType(metricType)
+                        .microserviceId(microserviceId)
+                        .build())
+                        .subscribe())
                 /* on error send error metric */
-                .onErrorResume(throwable -> {
-                    System.out.println(metricType.name() + " error");
-                    return metricsWebClient.collectErrorMetric(ErrorMetricData.builder()
-                            .endTimeOfProcess(Instant.now())
-                            .startTimeOfProcess(instant)
-                            .metricType(metricType)
-                            .errorMessage(throwable.getMessage())
-                            .microserviceId(microserviceId)
-                            .build())
-                            .then(Mono.error(throwable));
-                });
+                .doOnError(throwable -> metricsWebClient.collectErrorMetric(ErrorMetricData.builder()
+                        .endTimeOfProcess(Instant.now())
+                        .startTimeOfProcess(instant)
+                        .metricType(metricType)
+                        .errorMessage(throwable.getMessage())
+                        .microserviceId(microserviceId)
+                        .build())
+                        .subscribe());
     }
 }

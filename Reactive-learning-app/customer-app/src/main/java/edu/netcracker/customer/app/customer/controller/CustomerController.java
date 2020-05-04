@@ -1,6 +1,7 @@
 package edu.netcracker.customer.app.customer.controller;
 
 import edu.netcracker.common.metrics.annotations.DeletingMetricAnnotation;
+import edu.netcracker.common.metrics.annotations.InteractingMetricAnnotation;
 import edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation;
 import edu.netcracker.customer.app.customer.entity.Customer;
 import edu.netcracker.customer.app.customer.service.CustomerService;
@@ -33,6 +34,7 @@ public class CustomerController {
     }
 
     @GetMapping("/customer")
+    @InteractingMetricAnnotation
     public Mono<Customer> findCustomer(@RequestParam(required = false) Integer customerId, @RequestParam(required = false) String email) {
         return Objects.nonNull(customerId) ?
                 customerService.findCustomerById(customerId) :
@@ -40,6 +42,7 @@ public class CustomerController {
     }
 
     @GetMapping
+    @InteractingMetricAnnotation
     public Flux<Customer> findAllCustomers() {
         return customerService.findAllCustomers();
     }
@@ -51,6 +54,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
+    @InteractingMetricAnnotation
     public Mono<Customer> updateCustomer(@PathVariable Integer id, @RequestBody(required = false) Customer customer) {
         return customerService.updateCustomer(id, customer);
     }

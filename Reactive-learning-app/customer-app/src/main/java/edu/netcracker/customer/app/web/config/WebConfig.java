@@ -1,10 +1,14 @@
 package edu.netcracker.customer.app.web.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import edu.netcracker.common.metrics.serialization.InstantDeserializer;
 import edu.netcracker.common.metrics.serialization.InstantFormatter;
+import edu.netcracker.common.metrics.serialization.InstantSerializer;
 import org.reactivestreams.Publisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.Formatter;
+import org.springframework.format.FormatterRegistry;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import springfox.documentation.builders.PathSelectors;
@@ -18,6 +22,13 @@ import java.time.Instant;
 @EnableSwagger2WebFlux
 @Configuration
 public class WebConfig {
+
+    public WebConfig(FormatterRegistry formatterRegistry, ObjectMapper objectMapper) {
+        formatterRegistry.addFormatter(new InstantFormatter());
+        objectMapper.registerModule(new SimpleModule().addDeserializer(Instant.class, new InstantDeserializer())
+                .addSerializer(Instant.class, new InstantSerializer()));
+    }
+
     @Bean
     public Docket swaggerDocket() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -26,10 +37,5 @@ public class WebConfig {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
-    }
-
-    @Bean
-    public Formatter<Instant> instantFormatter() {
-        return new InstantFormatter();
     }
 }
