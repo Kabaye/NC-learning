@@ -8,10 +8,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import reactor.core.CorePublisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.List;
 
 @Component
 @Aspect
@@ -46,15 +48,16 @@ public class MetricsAspect {
         Instant instant = Instant.now();
         Object result = joinPoint.proceed();
         if (result instanceof Mono<?>) {
-            return addMetricIntermediateOperation(instant, registration, ((Mono<?>) result));
+            return addMetricIntermediateOperation(instant, registration, ((Mono<?>) result), false);
         } else if (result instanceof Flux<?>) {
-            return addMetricIntermediateOperation(instant, registration, ((Flux<?>) result).collectList());
+            return addMetricIntermediateOperation(instant, registration, ((Flux<?>) result).collectList(), true);
         }
         return result;
     }
 
-    private Mono<?> addMetricIntermediateOperation(Instant instant, MetricType metricType, Mono<?> result) {
-        return result
+    @SuppressWarnings("unchecked")
+    private CorePublisher<?> addMetricIntermediateOperation(Instant instant, MetricType metricType, Mono<?> result, boolean isFlux) {
+        final Mono<?> mono = result
                 /* on success send success metric */
                 .doOnSuccess(o -> metricsWebClient.collectSuccessfulMetric(SuccessfulMetricData.builder()
                         .endTimeOfProcess(Instant.now())
@@ -72,5 +75,10 @@ public class MetricsAspect {
                         .microserviceId(microserviceId)
                         .build())
                         .subscribe());
+        if (isFlux) {
+            Mono<List<?>> fluxMono = (Mono<List<?>>) mono;
+            return fluxMono.flatMapMany(Flux::fromIterable);
+        }
+        return mono;
     }
 }
