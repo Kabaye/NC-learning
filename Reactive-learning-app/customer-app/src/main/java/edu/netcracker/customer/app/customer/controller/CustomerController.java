@@ -5,8 +5,6 @@ import edu.netcracker.common.metrics.annotations.InteractingMetricAnnotation;
 import edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation;
 import edu.netcracker.customer.app.customer.entity.Customer;
 import edu.netcracker.customer.app.customer.service.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +22,6 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api/v1/customers")
 public class CustomerController {
-    @Autowired
-    ApplicationContext applicationContext;
-
     private final CustomerService customerService;
 
     public CustomerController(CustomerService customerService) {

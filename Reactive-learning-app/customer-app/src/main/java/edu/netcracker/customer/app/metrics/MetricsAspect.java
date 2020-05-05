@@ -44,13 +44,13 @@ public class MetricsAspect {
         return doAround(joinPoint, MetricType.DELETING);
     }
 
-    private Object doAround(ProceedingJoinPoint joinPoint, MetricType registration) throws Throwable {
+    private Object doAround(ProceedingJoinPoint joinPoint, MetricType metricType) throws Throwable {
         Instant instant = Instant.now();
         Object result = joinPoint.proceed();
         if (result instanceof Mono<?>) {
-            return addMetricIntermediateOperation(instant, registration, ((Mono<?>) result), false);
+            return addMetricIntermediateOperation(instant, metricType, ((Mono<?>) result), false);
         } else if (result instanceof Flux<?>) {
-            return addMetricIntermediateOperation(instant, registration, ((Flux<?>) result).collectList(), true);
+            return addMetricIntermediateOperation(instant, metricType, ((Flux<?>) result).collectList(), true);
         }
         return result;
     }
