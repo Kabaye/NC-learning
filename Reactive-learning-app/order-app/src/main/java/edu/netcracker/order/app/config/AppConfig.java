@@ -1,6 +1,8 @@
-package edu.netcracker.order.app.web.config;
+package edu.netcracker.order.app.config;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.reactivestreams.Publisher;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
@@ -13,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebFlux;
 
 @EnableSwagger2WebFlux
 @Configuration
-public class SwaggerConfig {
+public class AppConfig {
     @Bean
     public Docket swaggerDocket() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -22,5 +24,10 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
+    }
+
+    @Bean
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+        return registry -> registry.config().commonTags("application", "Order Module Application");
     }
 }

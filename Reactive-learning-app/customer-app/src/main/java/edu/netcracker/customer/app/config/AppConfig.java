@@ -1,11 +1,13 @@
-package edu.netcracker.customer.app.web.config;
+package edu.netcracker.customer.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import edu.netcracker.common.metrics.serialization.InstantDeserializer;
 import edu.netcracker.common.metrics.serialization.InstantFormatter;
 import edu.netcracker.common.metrics.serialization.InstantSerializer;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.reactivestreams.Publisher;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -21,9 +23,9 @@ import java.time.Instant;
 
 @EnableSwagger2WebFlux
 @Configuration
-public class WebConfig {
+public class AppConfig {
 
-    public WebConfig(FormatterRegistry formatterRegistry, ObjectMapper objectMapper) {
+    public AppConfig(FormatterRegistry formatterRegistry, ObjectMapper objectMapper) {
         formatterRegistry.addFormatter(new InstantFormatter());
         objectMapper.registerModule(new SimpleModule().addDeserializer(Instant.class, new InstantDeserializer())
                 .addSerializer(Instant.class, new InstantSerializer()));
@@ -37,5 +39,10 @@ public class WebConfig {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
+    }
+
+    @Bean
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+        return registry -> registry.config().commonTags("application", "Customer Module Application");
     }
 }
