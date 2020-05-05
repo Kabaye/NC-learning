@@ -71,9 +71,9 @@ public class OrderService {
                         .then(Mono.just(ord)))
                 .map(ord -> OrderUtils.postProcessTotalPriceValue(ord, MoneyUtils::convertToDBPrecision, true))
                 .flatMap(orderRepository::save)
-                .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts().
-                        stream().
-                        parallel()
+                .flatMap(ord -> ordersProductsRelationRepository.saveOrderProductRelation(ord.getProducts()
+                        .stream()
+                        .parallel()
                         .map(productIntegerPair -> new
                                 OrdersProductsRelationModel(null, ord.getId(),
                                 productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
