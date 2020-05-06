@@ -1,5 +1,6 @@
 package edu.netcracker.common.metrics.models;
 
+import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +13,7 @@ import java.time.Instant;
 @Table("successful_metrics")
 public class SuccessfulMetricData extends MetricData {
     @Builder
-    public SuccessfulMetricData(Integer id, Instant startTimeOfProcess, Instant endTimeOfProcess, MetricType metricType, String microserviceId) {
-        super(id, startTimeOfProcess, endTimeOfProcess, metricType, microserviceId);
+    public SuccessfulMetricData(Integer id, Instant startTimeOfProcess, Instant endTimeOfProcess, MetricType metricType, MicroserviceName microserviceName) {
+        super(id, startTimeOfProcess, endTimeOfProcess, metricType, microserviceName);
     }
 }

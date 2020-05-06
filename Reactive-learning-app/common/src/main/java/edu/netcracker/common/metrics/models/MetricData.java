@@ -1,5 +1,6 @@
 package edu.netcracker.common.metrics.models;
 
+import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
@@ -12,13 +13,13 @@ public abstract class MetricData {
     private Instant startTimeOfProcess;
     private Instant endTimeOfProcess;
     private MetricType metricType;
-    private String microserviceId;
+    private MicroserviceName microserviceName;
 
-    public MetricData(Integer id, Instant startTimeOfProcess, Instant endTimeOfProcess, MetricType metricType, String microserviceId) {
+    public MetricData(Integer id, Instant startTimeOfProcess, Instant endTimeOfProcess, MetricType metricType, MicroserviceName microserviceName) {
         this.id = id;
         this.startTimeOfProcess = startTimeOfProcess;
         this.endTimeOfProcess = endTimeOfProcess;
         this.metricType = metricType;
-        this.microserviceId = microserviceId;
+        this.microserviceName = microserviceName;
     }
 }
