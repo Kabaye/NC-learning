@@ -1,5 +1,6 @@
 package edu.netcracker.order.app.config;
 
+import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.reactivestreams.Publisher;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
@@ -28,6 +29,6 @@ public class AppConfig {
 
     @Bean
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config().commonTags("application", "Order Module Application");
+        return registry -> registry.config().commonTags("application", MicroserviceName.ORDER_APP.name());
     }
 }

@@ -1,5 +1,6 @@
 package edu.netcracker.metrics.controller;
 
+import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import edu.netcracker.common.metrics.models.ErrorMetricData;
 import edu.netcracker.common.metrics.models.MetricType;
 import edu.netcracker.common.metrics.models.SuccessfulMetricData;
@@ -25,16 +26,16 @@ public class MetricsController {
         this.metricsService = metricsService;
     }
 
-    @GetMapping("/error/{microserviceId}")
-    Flux<ErrorMetricData> findErrorMetrics(@PathVariable String microserviceId, @RequestParam(required = false) MetricType metricType) {
-        return Objects.isNull(metricType) ? metricsService.findAllErrorMetrics(microserviceId) :
-                metricsService.findAllErrorMetricsByMetricType(microserviceId, metricType);
+    @GetMapping("/error/{microserviceName}")
+    public Flux<ErrorMetricData> findErrorMetrics(@PathVariable MicroserviceName microserviceName, @RequestParam(required = false) MetricType metricType) {
+        return Objects.isNull(metricType) ? metricsService.findAllErrorMetrics(microserviceName) :
+                metricsService.findAllErrorMetricsByMetricType(microserviceName, metricType);
     }
 
-    @GetMapping("/successful/{microserviceId}")
-    Flux<SuccessfulMetricData> findSuccessfulMetric(@PathVariable String microserviceId, @RequestParam(required = false) MetricType metricType) {
-        return Objects.isNull(metricType) ? metricsService.findAllSuccessfulMetrics(microserviceId) :
-                metricsService.findAllSuccessfulMetricByMetricType(microserviceId, metricType);
+    @GetMapping("/successful/{microserviceName}")
+    public Flux<SuccessfulMetricData> findSuccessfulMetric(@PathVariable MicroserviceName microserviceName, @RequestParam(required = false) MetricType metricType) {
+        return Objects.isNull(metricType) ? metricsService.findAllSuccessfulMetrics(microserviceName) :
+                metricsService.findAllSuccessfulMetricByMetricType(microserviceName, metricType);
     }
 
     @PostMapping("/error")

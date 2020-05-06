@@ -2,6 +2,7 @@ package edu.netcracker.customer.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import edu.netcracker.common.metrics.serialization.InstantDeserializer;
 import edu.netcracker.common.metrics.serialization.InstantFormatter;
 import edu.netcracker.common.metrics.serialization.InstantSerializer;
@@ -43,6 +44,6 @@ public class AppConfig {
 
     @Bean
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config().commonTags("application", "Customer Module Application");
+        return registry -> registry.config().commonTags("application", MicroserviceName.CUSTOMER_APP.name());
     }
 }

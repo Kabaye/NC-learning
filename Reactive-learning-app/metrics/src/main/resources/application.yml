@@ -5,3 +5,19 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/METRIC
     username: postgres
+
+management:
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: beans,caches,health,httptrace,info,metrics,mappings,sessions,shutdown,threaddump,env,prometheus
+      base-path: /monitor
