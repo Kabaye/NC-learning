@@ -5,8 +5,8 @@ import edu.netcracker.common.metrics.microservice.MicroserviceName;
 import edu.netcracker.common.metrics.models.ErrorMetricData;
 import edu.netcracker.common.metrics.models.MetricType;
 import edu.netcracker.common.metrics.models.SuccessfulMetricData;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import lombok.SneakyThrows;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -16,23 +16,25 @@ import reactor.core.CorePublisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Aspect
 public class MetricsAspect {
     private final MetricsWebClient metricsWebClient;
-    private final Map<String, Timer> timers;
+    private final Map<MetricType, Counter> successfulCounters;
+    private final Map<MetricType, Counter> errorCounters;
     private final MeterRegistry meterRegistry;
 
     public MetricsAspect(MetricsWebClient metricsWebClient, MeterRegistry meterRegistry) {
         this.metricsWebClient = metricsWebClient;
         this.meterRegistry = meterRegistry;
-        this.timers = new ConcurrentHashMap<>();
+        this.successfulCounters = new ConcurrentHashMap<>();
+        this.errorCounters = new ConcurrentHashMap<>();
     }
 
     @SneakyThrows
@@ -57,23 +59,26 @@ public class MetricsAspect {
         Instant instant = Instant.now();
         Object result = joinPoint.proceed();
         if (result instanceof Mono<?>) {
-            return addMetricIntermediateOperation(instant, metricType, ((Mono<?>) result), joinPoint.getSignature().getName(), false);
+            return addMetricConsumer(instant, metricType, ((Mono<?>) result), joinPoint.getSignature().getName(), false);
         } else if (result instanceof Flux<?>) {
-            return addMetricIntermediateOperation(instant, metricType, ((Flux<?>) result).collectList(), joinPoint.getSignature().getName(), true);
+            return addMetricConsumer(instant, metricType, ((Flux<?>) result).collectList(), joinPoint.getSignature().getName(), true);
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private CorePublisher<?> addMetricIntermediateOperation(Instant instant, MetricType metricType, Mono<?> result, String methodName, boolean isFlux) {
+    private CorePublisher<?> addMetricConsumer(Instant instant, MetricType metricType, Mono<?> result, String methodName, boolean isFlux) {
         final Mono<?> mono = result
                 /* on success send success metric */
                 .doOnSuccess(o -> {
-                    if (!timers.containsKey(methodName)) {
-                        timers.put(methodName, Timer.builder(getFormattedMethodName(methodName))
-                                .description("Custom timer for request latency").register(meterRegistry));
+                    Counter counter = successfulCounters.get(metricType);
+                    if (Objects.isNull(counter)) {
+                        counter = Counter.builder(convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, metricType.name())
+                                .replaceAll("_", ".") + ".successful.event")
+                                .register(meterRegistry);
+                        successfulCounters.put(metricType, counter);
                     }
-                    timers.get(methodName).record(Duration.between(instant, Instant.now()));
+                    counter.increment();
 
                     metricsWebClient.collectSuccessfulMetric(SuccessfulMetricData.builder()
                             .endTimeOfProcess(Instant.now())
@@ -85,11 +90,14 @@ public class MetricsAspect {
                 })
                 /* on error send error metric */
                 .doOnError(throwable -> {
-                    if (!timers.containsKey(methodName)) {
-                        timers.put(methodName, Timer.builder(getFormattedMethodName(methodName))
-                                .description("Custom timer for request latency").register(meterRegistry));
+                    Counter counter = errorCounters.get(metricType);
+                    if (Objects.isNull(counter)) {
+                        counter = Counter.builder(convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, metricType.name())
+                                .replaceAll("_", ".") + ".error.event")
+                                .register(meterRegistry);
+                        successfulCounters.put(metricType, counter);
                     }
-                    timers.get(methodName).record(Duration.between(instant, Instant.now()));
+                    counter.increment();
 
                     metricsWebClient.collectErrorMetric(ErrorMetricData.builder()
                             .endTimeOfProcess(Instant.now())
@@ -109,8 +117,8 @@ public class MetricsAspect {
         return mono;
     }
 
-    private String getFormattedMethodName(String methodName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodName)
-                .replaceAll("_", ".");
+    private String convertToAnotherFormat(CaseFormat from, CaseFormat to, String st) {
+        return from.to(to, st);
     }
+
 }

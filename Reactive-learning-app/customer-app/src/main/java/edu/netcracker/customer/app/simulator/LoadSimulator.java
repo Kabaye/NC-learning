@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 public class LoadSimulator {
     private final WebClient webClient;
 
-    private final AtomicInteger customerIdNew = new AtomicInteger(91);
-    private final AtomicInteger customerIdOld = new AtomicInteger(91);
+    private final AtomicInteger customerIdNew = new AtomicInteger(112);
+    private final AtomicInteger customerIdOld = new AtomicInteger();
     private final AtomicReference<String> email = new AtomicReference<>("svyat@gmail.com");
 
     public LoadSimulator(WebClient.Builder webClientBuilder) {
@@ -72,8 +72,6 @@ public class LoadSimulator {
                         .retrieve()
                         .toBodilessEntity()
                 ).subscribe();
-
-
     }
 
     private String getRandomEmail() {
