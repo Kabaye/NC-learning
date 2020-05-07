@@ -4,10 +4,10 @@ import edu.netcracker.common.currency.model.Currency;
 import edu.netcracker.customer.app.customer.entity.Customer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,9 +33,9 @@ public class LoadSimulator {
         //calling findCustomer every 7 seconds
         Flux.interval(Duration.ofSeconds(1), Duration.ofSeconds(7))
                 .flatMap(l -> webClient.get()
-                        .uri(UriComponentsBuilder.fromPath("/customer")
-                                .queryParam("email", email.get())
-                                .toUriString())
+                        .uri(uriBuilder -> uriBuilder.path("/customer")
+                                .queryParam("email", "{email}")
+                                .build(Map.of("email", email.get())))
                         .retrieve()
                         .toBodilessEntity())
                 .subscribe();
@@ -56,8 +56,8 @@ public class LoadSimulator {
         //calling updateCustomer every 10 seconds
         Flux.interval(Duration.ofSeconds(3), Duration.ofSeconds(10))
                 .flatMap(l -> webClient.put()
-                        .uri(UriComponentsBuilder.fromPath("/" + customerIdNew.get())
-                                .toUriString())
+                        .uri(uriBuilder -> uriBuilder.path("/{customerId}")
+                                .build(Map.of("customerId", customerIdNew.get())))
                         .bodyValue(new Customer(customerIdNew.get(), getRandomEmail(), getRandomAlphabeticString(5), getRandomAlphanumericString(15), Currency.JPY))
                         .retrieve()
                         .bodyToMono(Customer.class)
@@ -67,8 +67,8 @@ public class LoadSimulator {
         //calling deleteCustomer every 10 seconds
         Flux.interval(Duration.ofSeconds(8), Duration.ofSeconds(10))
                 .flatMap(l -> webClient.delete()
-                        .uri(UriComponentsBuilder.fromPath("/" + customerIdOld.get())
-                                .toUriString())
+                        .uri(uriBuilder -> uriBuilder.path("/{customerId}")
+                                .build(Map.of("customerId", customerIdOld.get())))
                         .retrieve()
                         .toBodilessEntity()
                 ).subscribe();
