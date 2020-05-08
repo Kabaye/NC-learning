@@ -1,4 +1,4 @@
-package edu.netcracker.common.metrics.annotations;
+package edu.netcracker.common.metric.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,6 +1,6 @@
-package edu.netcracker.common.metrics.models;
+package edu.netcracker.common.metric.model;
 
-import edu.netcracker.common.metrics.microservice.MicroserviceName;
+import edu.netcracker.common.metric.microservice.MicroserviceName;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

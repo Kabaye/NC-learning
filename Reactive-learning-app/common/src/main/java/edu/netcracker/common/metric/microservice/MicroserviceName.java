@@ -1,4 +1,4 @@
-package edu.netcracker.common.metrics.microservice;
+package edu.netcracker.common.metric.microservice;
 
 public enum MicroserviceName {
     CUSTOMER_APP, ORDER_APP

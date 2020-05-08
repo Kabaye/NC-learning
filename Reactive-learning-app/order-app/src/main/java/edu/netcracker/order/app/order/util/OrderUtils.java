@@ -1,4 +1,4 @@
-package edu.netcracker.order.app.order.utils;
+package edu.netcracker.order.app.order.util;
 
 
 import edu.netcracker.common.currency.model.Currency;

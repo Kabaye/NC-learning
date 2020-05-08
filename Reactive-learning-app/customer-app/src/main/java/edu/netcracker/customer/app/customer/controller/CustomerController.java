@@ -1,8 +1,8 @@
 package edu.netcracker.customer.app.customer.controller;
 
-import edu.netcracker.common.metrics.annotations.DeletingMetricAnnotation;
-import edu.netcracker.common.metrics.annotations.InteractingMetricAnnotation;
-import edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation;
+import edu.netcracker.common.metric.annotation.DeletingMetricAnnotation;
+import edu.netcracker.common.metric.annotation.InteractingMetricAnnotation;
+import edu.netcracker.common.metric.annotation.RegistrationMetricAnnotation;
 import edu.netcracker.customer.app.customer.entity.Customer;
 import edu.netcracker.customer.app.customer.service.CustomerService;
 import org.springframework.web.bind.annotation.DeleteMapping;

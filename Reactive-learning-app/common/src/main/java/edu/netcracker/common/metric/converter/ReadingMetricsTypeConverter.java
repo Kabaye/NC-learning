@@ -1,6 +1,6 @@
-package edu.netcracker.common.metrics.converters;
+package edu.netcracker.common.metric.converter;
 
-import edu.netcracker.common.metrics.models.MetricType;
+import edu.netcracker.common.metric.model.MetricType;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 

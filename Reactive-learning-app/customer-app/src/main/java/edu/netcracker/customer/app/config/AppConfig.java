@@ -2,10 +2,10 @@ package edu.netcracker.customer.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import edu.netcracker.common.metrics.microservice.MicroserviceName;
-import edu.netcracker.common.metrics.serialization.InstantDeserializer;
-import edu.netcracker.common.metrics.serialization.InstantFormatter;
-import edu.netcracker.common.metrics.serialization.InstantSerializer;
+import edu.netcracker.common.metric.microservice.MicroserviceName;
+import edu.netcracker.common.metric.serialization.InstantDeserializer;
+import edu.netcracker.common.metric.serialization.InstantFormatter;
+import edu.netcracker.common.metric.serialization.InstantSerializer;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.reactivestreams.Publisher;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;

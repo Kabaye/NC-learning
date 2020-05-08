@@ -2,7 +2,7 @@ package edu.netcracker.order.app.order.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import edu.netcracker.common.currency.model.Currency;
-import edu.netcracker.order.app.order.utils.OrderSerializer;
+import edu.netcracker.order.app.order.util.OrderSerializer;
 import edu.netcracker.order.app.product.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;

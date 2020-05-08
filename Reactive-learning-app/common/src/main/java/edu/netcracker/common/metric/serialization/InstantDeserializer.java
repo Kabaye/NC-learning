@@ -1,4 +1,4 @@
-package edu.netcracker.common.metrics.serialization;
+package edu.netcracker.common.metric.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,4 +1,4 @@
-package edu.netcracker.order.app.order.utils;
+package edu.netcracker.order.app.order.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

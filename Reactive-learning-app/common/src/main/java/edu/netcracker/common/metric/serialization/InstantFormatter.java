@@ -1,4 +1,4 @@
-package edu.netcracker.common.metrics.serialization;
+package edu.netcracker.common.metric.serialization;
 
 import org.springframework.format.Formatter;
 

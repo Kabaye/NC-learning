@@ -5,7 +5,7 @@ import edu.netcracker.common.currency.utils.MoneyUtils;
 import edu.netcracker.order.app.client.DefaultWebClient;
 import edu.netcracker.order.app.order.entity.Order;
 import edu.netcracker.order.app.order.repository.OrderRepository;
-import edu.netcracker.order.app.order.utils.OrderUtils;
+import edu.netcracker.order.app.order.util.OrderUtils;
 import edu.netcracker.order.app.order_product.entity.OrdersProductsRelationModel;
 import edu.netcracker.order.app.order_product.repository.DefaultOrdersProductsRelationRepository;
 import edu.netcracker.order.app.product.entity.Product;

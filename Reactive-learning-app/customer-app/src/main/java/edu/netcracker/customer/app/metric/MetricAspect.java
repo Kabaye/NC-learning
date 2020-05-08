@@ -1,7 +1,7 @@
-package edu.netcracker.customer.app.metrics;
+package edu.netcracker.customer.app.metric;
 
 import com.google.common.base.CaseFormat;
-import edu.netcracker.common.metrics.models.MetricType;
+import edu.netcracker.common.metric.model.MetricType;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
@@ -20,31 +20,31 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Aspect
-public class MetricsAspect {
+public class MetricAspect {
     private final Map<MetricType, Counter> successfulCounters;
     private final Map<MetricType, Counter> errorCounters;
     private final MeterRegistry meterRegistry;
 
-    public MetricsAspect(MeterRegistry meterRegistry) {
+    public MetricAspect(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         this.successfulCounters = new ConcurrentHashMap<>();
         this.errorCounters = new ConcurrentHashMap<>();
     }
 
     @SneakyThrows
-    @Around("@annotation(edu.netcracker.common.metrics.annotations.RegistrationMetricAnnotation)")
+    @Around("@annotation(edu.netcracker.common.metric.annotation.RegistrationMetricAnnotation)")
     public Object aroundRegistration(ProceedingJoinPoint joinPoint) {
         return doAround(joinPoint, MetricType.REGISTRATION);
     }
 
     @SneakyThrows
-    @Around("@annotation(edu.netcracker.common.metrics.annotations.InteractingMetricAnnotation)")
+    @Around("@annotation(edu.netcracker.common.metric.annotation.InteractingMetricAnnotation)")
     public Object aroundInteracting(ProceedingJoinPoint joinPoint) {
         return doAround(joinPoint, MetricType.INTERACTING);
     }
 
     @SneakyThrows
-    @Around("@annotation(edu.netcracker.common.metrics.annotations.DeletingMetricAnnotation)")
+    @Around("@annotation(edu.netcracker.common.metric.annotation.DeletingMetricAnnotation)")
     public Object aroundDeleting(ProceedingJoinPoint joinPoint) {
         return doAround(joinPoint, MetricType.DELETING);
     }
