@@ -120,7 +120,6 @@
         <module>customer-app</module>
         <module>order-app</module>
         <module>common</module>
-        <module>metrics</module>
     </modules>
 
 </project>
