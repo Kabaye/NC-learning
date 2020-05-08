@@ -1,8 +1,6 @@
 package edu.netcracker.customer.app.customer.controller;
 
-import edu.netcracker.common.metric.annotation.DeletingMetricAnnotation;
-import edu.netcracker.common.metric.annotation.InteractingMetricAnnotation;
-import edu.netcracker.common.metric.annotation.RegistrationMetricAnnotation;
+import edu.netcracker.common.metric.annotation.Metric;
 import edu.netcracker.customer.app.customer.entity.Customer;
 import edu.netcracker.customer.app.customer.service.CustomerService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +17,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static edu.netcracker.common.metric.model.MetricType.DELETING;
+import static edu.netcracker.common.metric.model.MetricType.INTERACTING;
+import static edu.netcracker.common.metric.model.MetricType.REGISTRATION;
+
 @RestController
 @RequestMapping("/api/v1/customers")
 public class CustomerController {
@@ -29,7 +31,7 @@ public class CustomerController {
     }
 
     @GetMapping("/customer")
-    @InteractingMetricAnnotation
+    @Metric(type = INTERACTING)
     public Mono<Customer> findCustomer(@RequestParam(required = false) Integer customerId, @RequestParam(required = false) String email) {
         return Objects.nonNull(customerId) ?
                 customerService.findCustomerById(customerId) :
@@ -37,25 +39,25 @@ public class CustomerController {
     }
 
     @GetMapping
-    @InteractingMetricAnnotation
+    @Metric(type = INTERACTING)
     public Flux<Customer> findAllCustomers() {
         return customerService.findAllCustomers();
     }
 
     @PostMapping
-    @RegistrationMetricAnnotation
+    @Metric(type = REGISTRATION)
     public Mono<Customer> saveCustomer(@RequestBody Customer customer) {
         return customerService.saveCustomer(customer);
     }
 
     @PutMapping("/{id}")
-    @InteractingMetricAnnotation
+    @Metric(type = INTERACTING)
     public Mono<Customer> updateCustomer(@PathVariable Integer id, @RequestBody(required = false) Customer customer) {
         return customerService.updateCustomer(id, customer);
     }
 
     @DeleteMapping("/{id}")
-    @DeletingMetricAnnotation
+    @Metric(type = DELETING)
     public Mono<Void> deleteCustomer(@PathVariable Integer id) {
         return customerService.deleteCustomer(id);
     }

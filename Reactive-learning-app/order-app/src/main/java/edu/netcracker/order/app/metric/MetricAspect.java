@@ -1,4 +1,4 @@
-package edu.netcracker.customer.app.metric;
+package edu.netcracker.order.app.metric;
 
 import com.google.common.base.CaseFormat;
 import edu.netcracker.common.metric.annotation.Metric;
@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 @Aspect
+@Component
 public class MetricAspect {
     private final Map<MetricType, Counter> successfulCounters;
     private final Map<MetricType, Counter> errorCounters;
@@ -35,12 +35,15 @@ public class MetricAspect {
 
     @SneakyThrows
     @Around("@annotation(edu.netcracker.common.metric.annotation.Metric)")
-    public Object around(ProceedingJoinPoint joinPoint) {
-        Metric metric = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Metric.class);
-        return doAround(joinPoint, metric.type());
+    public Object aroundInteracting(ProceedingJoinPoint joinPoint) {
+        return doAround(joinPoint, ((MethodSignature) joinPoint.getSignature())
+                .getMethod()
+                .getAnnotation(Metric.class)
+                .type());
     }
 
-    private Object doAround(ProceedingJoinPoint joinPoint, MetricType metricType) throws Throwable {
+    @SneakyThrows
+    private Object doAround(ProceedingJoinPoint joinPoint, MetricType metricType) {
         Object result = joinPoint.proceed();
         if (result instanceof Mono<?>) {
             return addMetricConsumer(metricType, ((Mono<?>) result), joinPoint.getSignature().getName(), false);
@@ -53,7 +56,7 @@ public class MetricAspect {
     @SuppressWarnings("unchecked")
     private CorePublisher<?> addMetricConsumer(MetricType metricType, Mono<?> result, String methodName, boolean isFlux) {
         final Mono<?> mono = result
-                /* on success increase success metric */
+                /* on success increase success counter */
                 .doOnSuccess(o -> {
                     Counter counter = successfulCounters.get(metricType);
                     if (Objects.isNull(counter)) {
