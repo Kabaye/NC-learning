@@ -1,5 +1,6 @@
 package edu.netcracker.order.app.product.controller;
 
+import edu.netcracker.common.metric.annotation.Metric;
 import edu.netcracker.order.app.product.entity.Product;
 import edu.netcracker.order.app.product.service.ProductService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static edu.netcracker.common.metric.model.MetricType.INTERACTING;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -38,11 +41,13 @@ public class ProductController {
     }
 
     @GetMapping
+    @Metric(type = INTERACTING)
     public Flux<Product> findAllProducts() {
         return productService.findAllProducts();
     }
 
     @GetMapping("/{id}")
+    @Metric(type = INTERACTING)
     public Mono<Product> findProduct(@PathVariable Integer id) {
         return productService.findProductById(id);
     }
