@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -54,27 +53,15 @@ public class MetricAspect {
     private CorePublisher<?> addMetricConsumer(MetricType metricType, Mono<?> result, String methodName, boolean isFlux) {
         final Mono<?> mono = result
                 /* on success increase success metric */
-                .doOnSuccess(o -> {
-                    Counter counter = successfulCounters.get(metricType);
-                    if (Objects.isNull(counter)) {
-                        counter = Counter.builder(convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, metricType.name())
+                .doOnSuccess(o -> successfulCounters.computeIfAbsent(metricType, mt -> Counter.builder(
+                        convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, mt.name())
                                 .replaceAll("_", ".") + ".successful.event")
-                                .register(meterRegistry);
-                        successfulCounters.put(metricType, counter);
-                    }
-                    counter.increment();
-                })
+                        .register(meterRegistry)).increment())
                 /* on error increase error counter */
-                .doOnError(throwable -> {
-                    Counter counter = errorCounters.get(metricType);
-                    if (Objects.isNull(counter)) {
-                        counter = Counter.builder(convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, metricType.name())
+                .doOnError(throwable -> errorCounters.computeIfAbsent(metricType, mt -> Counter.builder(
+                        convertToAnotherFormat(CaseFormat.UPPER_UNDERSCORE, CaseFormat.LOWER_UNDERSCORE, mt.name())
                                 .replaceAll("_", ".") + ".error.event")
-                                .register(meterRegistry);
-                        errorCounters.put(metricType, counter);
-                    }
-                    counter.increment();
-                })
+                        .register(meterRegistry)).increment())
                 .name(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, methodName))
                 .metrics();
         if (isFlux) {
