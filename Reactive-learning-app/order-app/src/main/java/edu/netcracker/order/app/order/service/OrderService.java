@@ -79,8 +79,7 @@ public class OrderService {
                                 productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
                         .collect(Collectors.toList()))
                         .then(Mono.just(ord)))
-                .map(postProcessOrderFromDB)
-                .map(postProcessTotalPriceToCustomerCurrency);
+                .map(postProcessOrderFromDB);
     }
 
     public Mono<Order> updateOrder(Integer id, Order order) {
@@ -94,16 +93,12 @@ public class OrderService {
                             ord.setCurrency(customer.getCurrency());
                             return ord;
                         }))
-                .flatMap(this::findWithAllDetails);
+                .flatMap(this::findWithAllDetails)
+                .map(postProcessTotalPriceToCustomerCurrency);
     }
 
     public Flux<Order> findAll() {
         return orderRepository.findAll()
-                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
-                        .map(customer -> {
-                            ord.setCurrency(customer.getCurrency());
-                            return ord;
-                        }))
                 .flatMap(this::findWithAllDetails);
     }
 
@@ -200,8 +195,7 @@ public class OrderService {
                                             .collect(Collectors.toList()));
                                     return products;
                                 })).then(Mono.just(order))
-                .map(postProcessOrderFromDB)
-                .map(postProcessTotalPriceToCustomerCurrency);
+                .map(postProcessOrderFromDB);
     }
 
     private Mono<Order> updateOrder(Integer id, Order order, boolean updateTotalPrice) {

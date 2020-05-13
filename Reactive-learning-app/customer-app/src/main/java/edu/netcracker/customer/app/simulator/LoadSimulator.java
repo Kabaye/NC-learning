@@ -2,7 +2,6 @@ package edu.netcracker.customer.app.simulator;
 
 import edu.netcracker.common.currency.model.Currency;
 import edu.netcracker.customer.app.customer.entity.Customer;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
@@ -13,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class LoadSimulator {
     private final WebClient webClient;
 

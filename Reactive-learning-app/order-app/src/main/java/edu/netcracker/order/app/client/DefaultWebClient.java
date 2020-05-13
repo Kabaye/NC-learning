@@ -18,19 +18,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class DefaultWebClient {
-    private final WebClient webClient;
+    private final WebClient[] webClient;
     private final ObjectMapper objectMapper;
+    private final AtomicInteger counter;
 
     public DefaultWebClient(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8663/api/v1/customers").build();
+        this.webClient = new WebClient[10];
+        for (int i = 0; i < 10; i++) {
+            webClient[i] = webClientBuilder.baseUrl("http://localhost:8663/api/v1/customers").build();
+        }
         this.objectMapper = objectMapper;
+        counter = new AtomicInteger();
     }
 
     public Mono<Customer> getCustomerByEmail(String email) {
-        return webClient.get()
+        return webClient[Math.abs(counter.incrementAndGet() % 10)].get()
                 .uri(UriComponentsBuilder.newInstance()
                         .path("/customer")
                         .queryParam("email", email)

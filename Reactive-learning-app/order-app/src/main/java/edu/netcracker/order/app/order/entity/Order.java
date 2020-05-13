@@ -32,7 +32,7 @@ public class Order {
     private String customerEmail;
     private Double totalPrice = 0D;
     @Transient
-    private Currency currency;
+    private Currency currency = Currency.USD;
 
     public static Order of(OrderRequestModel orderRequestModel) {
         return new Order(null, orderRequestModel.getProducts().stream()

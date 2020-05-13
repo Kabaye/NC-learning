@@ -1,5 +1,7 @@
 package edu.netcracker.order.app.product.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import edu.netcracker.order.app.product.serializer.ProductSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,6 +12,7 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@JsonSerialize(using = ProductSerializer.class)
 public class Product {
     @Id
     private Integer id;
