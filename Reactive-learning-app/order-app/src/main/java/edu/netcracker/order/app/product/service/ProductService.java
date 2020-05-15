@@ -36,22 +36,29 @@ public class ProductService {
     }
 
     public Mono<Product> findProductById(Integer id) {
-        return productRepository.findById(id).map(moneyFromDB);
+        return productRepository.findById(id)
+                .map(moneyFromDB);
     }
 
     public Flux<Product> findAllProducts() {
-        return productRepository.findAll().map(moneyFromDB);
+        return productRepository.findAll()
+                .map(moneyFromDB);
     }
 
     public Mono<Product> saveProduct(Product product) {
-        return Mono.just(product).map(moneyToDB).flatMap(productRepository::save);
+        return Mono.just(product)
+                .map(moneyToDB)
+                .flatMap(productRepository::save)
+                .map(moneyFromDB);
     }
 
     public Mono<Product> updateProduct(Integer id, Product productForUpd) {
         return findProductById(id).map(product -> {
             productForUpd.setId(product.getId());
             return productForUpd;
-        }).flatMap(this::saveProduct);
+        }).map(moneyToDB)
+                .flatMap(this::saveProduct)
+                .map(moneyFromDB);
     }
 
     public Mono<Void> deleteProduct(Integer id) {

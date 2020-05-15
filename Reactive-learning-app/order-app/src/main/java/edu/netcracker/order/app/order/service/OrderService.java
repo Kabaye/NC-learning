@@ -33,7 +33,7 @@ public class OrderService {
     private final AtomicReference<Pair<Map<Currency, Double>, Currency>> rates = new AtomicReference<>();
 
     private final Function<Order, Order> postProcessOrderFromDB = order -> OrderUtils.postProcessTotalPriceValue(order, MoneyUtils::convertFromDbPrecision, false);
-    private final Function<Order, Order> postProcessTotalPriceToCustomerCurrency = order -> OrderUtils.postProcessTotalPriceCurrency(order, rates.get().getFirst());
+    private final Function<Order, Order> postProcessOrderPriceToCustomerCurrency = order -> OrderUtils.postProcessPriceCurrency(order, rates.get().getFirst());
 
     public OrderService(OrderRepository orderRepository, DefaultOrdersProductsRelationRepository ordersProductsRelationRepository, ProductService productService, DefaultWebClient defaultWebClient) {
         this.orderRepository = orderRepository;
@@ -94,7 +94,7 @@ public class OrderService {
                             return ord;
                         }))
                 .flatMap(this::findWithAllDetails)
-                .map(postProcessTotalPriceToCustomerCurrency);
+                .map(postProcessOrderPriceToCustomerCurrency);
     }
 
     public Flux<Order> findAll() {
@@ -215,7 +215,7 @@ public class OrderService {
                     }
                     return orderRepository.save(order)
                             .map(postProcessOrderFromDB)
-                            .map(postProcessTotalPriceToCustomerCurrency);
+                            .map(postProcessOrderPriceToCustomerCurrency);
                 });
     }
 }
