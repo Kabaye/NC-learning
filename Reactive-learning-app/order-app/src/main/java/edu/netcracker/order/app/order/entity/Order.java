@@ -15,6 +15,7 @@ import org.springframework.data.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -36,6 +37,7 @@ public class Order {
 
     public static Order of(OrderRequestModel orderRequestModel) {
         return new Order(null, orderRequestModel.getProducts().stream()
+                .filter(productAmountRequest -> Objects.nonNull(productAmountRequest.getAmount()) && Objects.nonNull(productAmountRequest.getProductId()))
                 .map(productAmountRequest -> Pair.of(new Product(productAmountRequest.getProductId(), null, null, null),
                         productAmountRequest.getAmount())).collect(Collectors.toList()), orderRequestModel.getCustomAddress(), orderRequestModel.getCustomerEmail(),
                 null, null);

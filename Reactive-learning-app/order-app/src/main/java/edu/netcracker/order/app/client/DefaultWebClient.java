@@ -17,39 +17,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class DefaultWebClient {
-    private final WebClient[] webClient;
+    private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final AtomicInteger counter;
 
     public DefaultWebClient(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.webClient = new WebClient[10];
-        for (int i = 0; i < 10; i++) {
-            webClient[i] = webClientBuilder.baseUrl("http://localhost:8663/api/v1/customers").build();
-        }
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8663/api/v1/customers").build();
         this.objectMapper = objectMapper;
         counter = new AtomicInteger();
     }
 
     public Mono<Customer> getCustomerByEmail(String email) {
-        return webClient[Math.abs(counter.incrementAndGet() % 10)].get()
+        return webClient.get()
                 .uri(UriComponentsBuilder.newInstance()
                         .path("/customer")
                         .queryParam("email", email)
                         .toUriString())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .flatMap(clientResponse -> clientResponse.toEntity(Customer.class))
-                .map(customerResponseEntity -> {
-                    if (Objects.isNull(customerResponseEntity.getBody())) {
-                        throw new RuntimeException(String.format("No such customer with email: %s!", email));
-                    }
-                    return customerResponseEntity.getBody();
-                });
+                .flatMap(clientResponse -> clientResponse.statusCode().is2xxSuccessful() ? clientResponse.bodyToMono(Customer.class)
+                        : Mono.error(new RuntimeException(String.format("No such customer with email: %s!", email))));
     }
 
     public Mono<Pair<Map<Currency, Double>, Currency>> getCurrentExchangeRates() {
