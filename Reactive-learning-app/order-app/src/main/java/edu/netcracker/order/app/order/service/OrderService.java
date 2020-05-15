@@ -88,6 +88,7 @@ public class OrderService {
 
     public Mono<Order> findOrder(Integer id) {
         return orderRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("No such order with id: " + id)))
                 .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
                         .map(customer -> {
                             ord.setCurrency(customer.getCurrency());
@@ -143,11 +144,6 @@ public class OrderService {
 
     public Mono<Order> deleteProduct(Integer orderId, Integer productId, Integer amount) {
         return this.findOrder(orderId)
-                .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
-                        .map(customer -> {
-                            ord.setCurrency(customer.getCurrency());
-                            return ord;
-                        }))
                 .flatMap(order -> ordersProductsRelationRepository.deleteProductFromOrder(
                         new OrdersProductsRelationModel(null, orderId, productId, amount))
                         .then(Mono.just(order)))
@@ -200,6 +196,7 @@ public class OrderService {
 
     private Mono<Order> updateOrder(Integer id, Order order, boolean updateTotalPrice) {
         return orderRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("No such order with id: " + id)))
                 .flatMap(ord -> defaultWebClient.getCustomerByEmail(ord.getCustomerEmail())
                         .map(customer -> {
                             ord.setCurrency(customer.getCurrency());

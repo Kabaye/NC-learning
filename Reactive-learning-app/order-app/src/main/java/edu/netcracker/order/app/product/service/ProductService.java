@@ -37,6 +37,7 @@ public class ProductService {
 
     public Mono<Product> findProductById(Integer id) {
         return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("No such product with id: " + id)))
                 .map(moneyFromDB);
     }
 

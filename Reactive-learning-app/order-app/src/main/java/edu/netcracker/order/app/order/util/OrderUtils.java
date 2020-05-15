@@ -10,8 +10,6 @@ import org.springframework.data.util.Pair;
 import java.util.Map;
 import java.util.function.Function;
 
-import static edu.netcracker.common.currency.model.Currency.USD;
-
 public class OrderUtils {
     private OrderUtils() {
     }
@@ -28,7 +26,7 @@ public class OrderUtils {
     public static Order postProcessPriceCurrency(Order order, Map<Currency, Double> rates) {
         order.setTotalPrice(MoneyUtils.convertMoney(order.getTotalPrice(), rates.get(order.getCurrency())));
         for (Pair<Product, Integer> product : order.getProducts()) {
-            product.getFirst().setPrice(MoneyUtils.convertMoney(product.getFirst().getPrice(), rates.get(USD)));
+            product.getFirst().setPrice(MoneyUtils.convertMoney(product.getFirst().getPrice(), rates.get(order.getCurrency())));
         }
         return order;
     }
