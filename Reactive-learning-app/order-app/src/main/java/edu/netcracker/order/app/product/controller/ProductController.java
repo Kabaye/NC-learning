@@ -31,7 +31,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Mono<Product> updateProduct(@PathVariable Integer id, @RequestBody Product product) {
+    public Mono<Product> updateProd(@PathVariable Integer id, @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 

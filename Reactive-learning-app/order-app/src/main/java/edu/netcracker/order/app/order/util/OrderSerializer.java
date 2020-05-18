@@ -22,7 +22,7 @@ public class OrderSerializer extends JsonSerializer<Order> {
         gen.writeArrayFieldStart("products");
         for (Pair<Product, Integer> productIntegerPair : value.getProducts()) {
             gen.writeStartObject();
-            gen.writeNumberField("id", value.getId());
+            gen.writeNumberField("id", productIntegerPair.getFirst().getId());
             gen.writeStringField("name", productIntegerPair.getFirst().getName());
             gen.writeStringField("description", productIntegerPair.getFirst().getDescription());
             gen.writeStringField("price", String.format("%.2f" + Currency.getInstance(value.getCurrency().name()).getSymbol(), productIntegerPair.getFirst().getPrice()));
