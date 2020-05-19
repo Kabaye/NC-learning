@@ -110,6 +110,9 @@ public class OrderService {
                 .then(orderRepository.deleteById(id));
     }
 
+    //TODO 19.05.2020 2 раза сохраняет связь, поулчается что в базе лежит 2 троки с одинаковым ордер и продукт id.
+    // Точку остановки в класе DefaultFetchSpec str 60 поставил
+    // ПОСМОТРЕТЬ СРОЧНООООООООООООООООООООООООООООООООО.
     public Mono<Order> addProduct(Integer orderId, Integer productId, Integer amount) {
         return this.findOrder(orderId)
                 .flatMap(order -> ordersProductsRelationRepository.addProductToOrder(new OrdersProductsRelationModel(null, orderId, productId, amount))
