@@ -9,6 +9,4 @@ interface OrdersProductsRelationRepository extends ReactiveCrudRepository<Orders
     Flux<OrdersProductsRelationModel> findAllByOrderId(Integer orderId);
 
     Mono<OrdersProductsRelationModel> findByOrderIdAndProductId(Integer orderId, Integer productId);
-
-    Mono<Void> deleteByOrderIdAndProductId(Integer orderId, Integer productId);
 }

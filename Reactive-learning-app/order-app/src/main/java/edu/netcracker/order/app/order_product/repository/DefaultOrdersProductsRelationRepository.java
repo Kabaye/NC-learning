@@ -5,8 +5,14 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Repository
 public class DefaultOrdersProductsRelationRepository {
@@ -16,8 +22,17 @@ public class DefaultOrdersProductsRelationRepository {
         this.ordersProductsRelationRepository = ordersProductsRelationRepository;
     }
 
-    public Flux<OrdersProductsRelationModel> saveOrderProductRelation(List<OrdersProductsRelationModel> ordersProductsRelationModels) {
-        return ordersProductsRelationRepository.saveAll(ordersProductsRelationModels);
+    @SafeVarargs
+    private static <T> Predicate<T> distinctByKeys(Function<? super T, ?>... keyExtractors) {
+        final Map<List<?>, Boolean> seen = new ConcurrentHashMap<>();
+
+        return t -> {
+            final List<?> keys = Arrays.stream(keyExtractors)
+                    .map(ke -> ke.apply(t))
+                    .collect(Collectors.toList());
+
+            return seen.putIfAbsent(keys, Boolean.TRUE) == null;
+        };
     }
 
     public Flux<OrdersProductsRelationModel> getAllOrderProducts(Integer orderId) {
@@ -28,18 +43,10 @@ public class DefaultOrdersProductsRelationRepository {
         return ordersProductsRelationRepository.deleteAll(iterable);
     }
 
-    public Mono<?> deleteProductFromOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
-        return ordersProductsRelationRepository.findByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(),
-                ordersProductsRelationModel.getProductId())
-                .flatMap(oprm -> {
-                    if (oprm.getAmount() <= ordersProductsRelationModel.getAmount()) {
-                        return ordersProductsRelationRepository.deleteByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(),
-                                ordersProductsRelationModel.getProductId());
-                    } else {
-                        oprm.setAmount(oprm.getAmount() - ordersProductsRelationModel.getAmount());
-                        return this.updateAmount(oprm);
-                    }
-                });
+    public Flux<OrdersProductsRelationModel> saveOrderProductRelation(List<OrdersProductsRelationModel> ordersProductsRelationModels) {
+        return ordersProductsRelationRepository.saveAll(ordersProductsRelationModels.stream()
+                .filter(distinctByKeys(OrdersProductsRelationModel::getOrderId, OrdersProductsRelationModel::getProductId))
+                .collect(Collectors.toList()));
     }
 
     public Mono<OrdersProductsRelationModel> addProductToOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
@@ -62,5 +69,19 @@ public class DefaultOrdersProductsRelationRepository {
                 return ordersProductsRelationRepository.save(ordersProductsRelationModel);
             }
         });
+    }
+
+    public Mono<?> deleteProductFromOrder(OrdersProductsRelationModel ordersProductsRelationModel) {
+        return ordersProductsRelationRepository.findByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(),
+                ordersProductsRelationModel.getProductId())
+                .flatMap(oprm -> {
+                    if (oprm.getAmount() <= ordersProductsRelationModel.getAmount()) {
+                        return ordersProductsRelationRepository.findByOrderIdAndProductId(ordersProductsRelationModel.getOrderId(), ordersProductsRelationModel.getProductId())
+                                .flatMap(ordersProductsRelationRepository::delete);
+                    } else {
+                        oprm.setAmount(oprm.getAmount() - ordersProductsRelationModel.getAmount());
+                        return this.updateAmount(oprm);
+                    }
+                });
     }
 }
