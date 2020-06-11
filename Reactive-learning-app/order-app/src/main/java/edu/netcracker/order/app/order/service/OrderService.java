@@ -55,7 +55,8 @@ public class OrderService {
                         .map(customer -> {
                             ord.setCurrency(customer.getCurrency());
                             return ord;
-                        })).flatMap(ord -> productService.findAllById(ord.getProducts().stream()
+                        }))
+                .flatMap(ord -> productService.findAllById(ord.getProducts().stream()
                         .map(productIntegerPair -> productIntegerPair.getFirst().getId())
                         .collect(Collectors.toList()))
                         .map(product -> {
