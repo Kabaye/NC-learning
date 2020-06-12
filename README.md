@@ -1,4 +1,3 @@
 # Netcracker Learning Repo
 
-*All Netcracker learning projects starting from `BeanPostProcessor for custom @Autowired annotation` will 
-be placed here*
+*All Netcracker learning projects will be placed here*
