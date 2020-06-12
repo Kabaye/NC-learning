@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: catalog
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Catalog
+    username: postgres
+    password: 99ronore
+    driverClassName: org.postgresql.Driver
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  mvc:
+    servlet:
+      path: /catalog
+server:
+  port: 8802
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+    initial-instance-info-replication-interval-seconds: 1
+  instance:
+    lease-renewal-interval-in-seconds: 1
+    preferIpAddress: true
+    ip-address: 127.0.0.1
+    lease-expiration-duration-in-seconds: 2

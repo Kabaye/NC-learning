@@ -1,0 +1,77 @@
+package com.netcracker.edu.kulich.tag.entity;
+
+import com.netcracker.edu.kulich.offer.entity.Offer;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringJoiner;
+
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+@Table(name = "tags")
+@NamedQueries({
+        @NamedQuery(name = "Tag.findByName", query = "SELECT t FROM Tag t where t.tagname = :tagname")
+})
+public class Tag {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "tag_id", nullable = false)
+    private long id = 0L;
+
+    @Column(nullable = false, unique = true)
+    private String tagname = "";
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "offers_tags",
+            joinColumns = @JoinColumn(name = "tag_id"),
+            inverseJoinColumns = @JoinColumn(name = "offer_id"))
+    private Set<Offer> offers = new HashSet<>();
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("tagname='" + tagname + "'")
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tag tag = (Tag) o;
+
+        return tagname.equals(tag.tagname);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return tagname.hashCode();
+    }
+
+    public void fixTagName() {
+        tagname = tagname.trim().replaceAll(" +", " ");
+    }
+}
+
+

@@ -1,0 +1,21 @@
+server:
+  port: 8800
+catalog:
+  name: http://catalog
+inventory:
+  name: http://inventory
+customer-management:
+  name: http://customer-management
+spring:
+  application:
+    name: processor
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    lease-renewal-interval-in-seconds: 1
+    preferIpAddress: true
+    ip-address: 127.0.0.1
+    lease-expiration-duration-in-seconds: 2
+servers:
