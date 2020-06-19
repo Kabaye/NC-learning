@@ -1,4 +1,5 @@
-.idea/
+target
+.idea
 
 ## File-based project format
 *.ipr
