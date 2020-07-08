@@ -13,7 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>Spring Boot Starter learning app</name>
     <description>Learning project for Spring Boot Starters</description>
-
+    <packaging>pom</packaging>
     <properties>
         <java.version>14</java.version>
     </properties>
@@ -51,4 +51,8 @@
         </plugins>
     </build>
 
+    <modules>
+        <module>SpringBoot-Starter-custom_swagger</module>
+        <module>SpringBoot-Starter-inclusion</module>
+    </modules>
 </project>
