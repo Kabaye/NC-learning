@@ -42,12 +42,12 @@ public class CustomerController {
         return customerService.saveCustomer(customer);
     }
 
-    @PutMapping("/${email}")
+    @PutMapping()
     public Customer updateCustomer(@RequestBody Customer customer) {
         return customerService.updateCustomer(customer);
     }
 
-    @DeleteMapping("/${email}")
+    @DeleteMapping("/{email}")
     public void deleteCustomer(@PathVariable String email) {
         customerService.deleteByEmail(email);
     }
