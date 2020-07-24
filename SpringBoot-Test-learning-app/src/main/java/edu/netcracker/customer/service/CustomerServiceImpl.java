@@ -54,20 +54,22 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer pay(String email, Double amount) {
         Customer customerForUpdate = findByEmail(email);
         final long l = (long) (amount * 1000);
-        if (customerForUpdate.getMoney().longValue() < l) {
+        final long mny = ((Double) (customerForUpdate.getMoney() * 1000)).longValue();
+        if (mny < l) {
             throw new RuntimeException("Not enough money for this operation!");
         }
         return customerDBProcessor.processCustomerFromDB(
                 saveCustomer(
-                        customerForUpdate.setMoney((double) (customerForUpdate.getMoney().longValue() - l))));
+                        customerForUpdate.setMoney((double) (mny - l) / 1000)));
     }
 
     @Override
     public Customer deposit(String email, Double amount) {
         Customer customerForUpdate = findByEmail(email);
         final long l = (long) (amount * 1000);
+        final long mny = ((Double) (customerForUpdate.getMoney() * 1000)).longValue();
         return customerDBProcessor.processCustomerFromDB(
                 saveCustomer(
-                        customerForUpdate.setMoney((double) (customerForUpdate.getMoney().longValue() + l))));
+                        customerForUpdate.setMoney((double) (mny + l) / 1000)));
     }
 }

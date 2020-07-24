@@ -16,4 +16,13 @@ public class Customer {
     private String email;
     private String address;
     private Double money;
+
+    public static Customer of(Customer customer) {
+        return new Customer()
+                .setMoney(customer.getMoney())
+                .setFirstName(customer.getFirstName())
+                .setAddress(customer.getAddress())
+                .setEmail(customer.getEmail())
+                .setId(customer.getId());
+    }
 }
