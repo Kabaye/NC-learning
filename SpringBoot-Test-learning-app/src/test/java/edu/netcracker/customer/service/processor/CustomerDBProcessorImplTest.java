@@ -1,11 +1,14 @@
 package edu.netcracker.customer.service.processor;
 
 import edu.netcracker.customer.entity.Customer;
+import edu.netcracker.customer.service.CustomerDBProcessorBaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,8 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DBProcessorTestConfiguration.class)
-@TestPropertySource("classpath:customer-db-processor-test.properties")
+@ContextHierarchy({
+        @ContextConfiguration(classes = CustomerDBProcessorBaseTest.class),
+//        @ContextConfiguration(classes = DBProcessorTestConfiguration.class)
+})
+@ActiveProfiles("customer-service-test")
+@SpringBootTest
 class CustomerDBProcessorImplTest {
 
     @Autowired
@@ -24,7 +31,6 @@ class CustomerDBProcessorImplTest {
 
     @Test
     void processCustomerToDB() {
-        System.out.println(customerDBProcessor.getMoneyPrecision());
         final double money = 399.99;
         Customer customer = new Customer()
                 .setMoney(money)

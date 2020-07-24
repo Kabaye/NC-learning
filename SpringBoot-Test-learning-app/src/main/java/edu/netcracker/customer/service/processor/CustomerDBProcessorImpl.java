@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 public class CustomerDBProcessorImpl implements CustomerDBProcessor {
 
     @Getter
-//    @Value("${customer.money-precision}")
-
-    private Integer moneyPrecision;
+    private final Integer moneyPrecision;
 
     @Autowired
     public CustomerDBProcessorImpl(CustomerConfigurationProperties customerConfigurationProperties) {

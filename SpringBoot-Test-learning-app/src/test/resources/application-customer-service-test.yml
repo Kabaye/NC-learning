@@ -1,2 +1,5 @@
 customer:
   money-precision:  1000
+logging:
+  level:
+    org.springframework.test.context.cache: debug

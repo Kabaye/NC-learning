@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @author svku0919
  * @version 24.07.2020
@@ -15,7 +17,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("edu.netcracker.customer.utils")
 @EnableConfigurationProperties(CustomerConfigurationProperties.class)
-public class CustomerDBProcessorCommon {
+public class CustomerDBProcessorBaseTest {
+
+    @PostConstruct
+    public void init() {
+        System.out.println("Base conf initialized");
+    }
 
     @Bean
     public CustomerDBProcessor customerDBProcessor(CustomerConfigurationProperties customerConfigurationProperties) {

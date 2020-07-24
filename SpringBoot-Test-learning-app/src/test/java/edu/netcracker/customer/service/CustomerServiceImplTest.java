@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -21,8 +23,12 @@ import java.util.Optional;
  * @version 24.07.2020
  */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = CustomerServiceImplTestConfiguration.class)
+@ContextHierarchy({
+        @ContextConfiguration(classes = CustomerDBProcessorBaseTest.class),
+//        @ContextConfiguration(classes = CustomerServiceImplTestConfiguration.class)
+})
 @ActiveProfiles("customer-service-test")
+@SpringBootTest
 class CustomerServiceImplTest {
     private CustomerService customerService;
 
