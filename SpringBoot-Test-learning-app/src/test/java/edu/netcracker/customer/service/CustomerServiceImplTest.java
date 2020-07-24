@@ -4,7 +4,6 @@ import edu.netcracker.customer.entity.Customer;
 import edu.netcracker.customer.repository.CustomerRepository;
 import edu.netcracker.customer.service.processor.CustomerDBProcessor;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -25,11 +24,12 @@ import java.util.Optional;
 @ExtendWith(SpringExtension.class)
 @ContextHierarchy({
         @ContextConfiguration(classes = CustomerDBProcessorBaseTest.class),
-//        @ContextConfiguration(classes = CustomerServiceImplTestConfiguration.class)
+        @ContextConfiguration(classes = CustomerServiceTestConfiguration.class)
 })
 @ActiveProfiles("customer-service-test")
 @SpringBootTest
 class CustomerServiceImplTest {
+    @Autowired
     private CustomerService customerService;
 
     @MockBean
@@ -37,11 +37,6 @@ class CustomerServiceImplTest {
 
     @Autowired
     private CustomerDBProcessor customerDBProcessor;
-
-    @BeforeEach
-    public void setUp() {
-        customerService = new CustomerServiceImpl(customerRepository, customerDBProcessor);
-    }
 
     @Test
     void pay() {
