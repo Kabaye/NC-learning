@@ -6,4 +6,4 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
 customer:
-  money-precision: 1000
+  money-precision: 100

@@ -6,4 +6,6 @@ public interface CustomerDBProcessor {
     Customer processCustomerToDB(Customer customer);
 
     Customer processCustomerFromDB(Customer customer);
+
+    Integer getMoneyPrecision();
 }

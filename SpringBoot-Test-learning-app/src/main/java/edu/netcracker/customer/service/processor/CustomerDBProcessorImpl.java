@@ -1,16 +1,23 @@
 package edu.netcracker.customer.service.processor;
 
 import edu.netcracker.customer.entity.Customer;
-import edu.netcracker.customer.util.CustomerConfigurationProperties;
-import org.springframework.stereotype.Service;
+import edu.netcracker.customer.utils.CustomerConfigurationProperties;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author svku0919
  */
-@Service
+@Component
 public class CustomerDBProcessorImpl implements CustomerDBProcessor {
-    private final Integer moneyPrecision;
 
+    @Getter
+//    @Value("${customer.money-precision}")
+
+    private Integer moneyPrecision;
+
+    @Autowired
     public CustomerDBProcessorImpl(CustomerConfigurationProperties customerConfigurationProperties) {
         moneyPrecision = customerConfigurationProperties.getMoneyPrecision();
     }
@@ -23,7 +30,7 @@ public class CustomerDBProcessorImpl implements CustomerDBProcessor {
 
     @Override
     public Customer processCustomerFromDB(Customer customer) {
-        final double money = (long) (customer.getMoney() / moneyPrecision);
+        final double money = customer.getMoney() / moneyPrecision;
         return customer.setMoney(money);
     }
 }

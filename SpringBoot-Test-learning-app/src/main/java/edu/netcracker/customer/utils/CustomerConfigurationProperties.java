@@ -1,4 +1,4 @@
-package edu.netcracker.customer.util;
+package edu.netcracker.customer.utils;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,5 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties("customer")
 public class CustomerConfigurationProperties {
-    private Integer moneyPrecision = 1000;
+    private Integer moneyPrecision;
 }
