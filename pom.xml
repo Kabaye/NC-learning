@@ -3,6 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>Learning</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>Akka-Demo-learning-app</module>
+    </modules>
     <groupId>edu.netcracker</groupId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Netcracker Learning Projects Storage</name>
