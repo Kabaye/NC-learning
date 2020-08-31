@@ -3,13 +3,10 @@ package edu.netcracker.sharding.system;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.Behaviors;
-import akka.cluster.sharding.typed.javadsl.ClusterSharding;
-import akka.cluster.sharding.typed.javadsl.Entity;
 import akka.cluster.typed.Cluster;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import edu.netcracker.sharding.actor.PuntoSwitcherActor;
-import edu.netcracker.sharding.client.ClientTicker;
 import edu.netcracker.sharding.client.PuntoSwitcherClient;
 import edu.netcracker.sharding.settings.PuntoSwitcherClientSettings;
 
@@ -44,14 +41,12 @@ public class PuntoSwitcherActorSystem {
                 Cluster cluster = Cluster.get(context.getSystem());
 
                 if (cluster.selfMember().hasRole("switcher")) {
-                    PuntoSwitcherActor.init(context.getSystem());
+                    PuntoSwitcherActor.init(context.getSystem(), "switcher");
                 } else if (cluster.selfMember().hasRole("client")) {
                     final int clientsAmount = PuntoSwitcherClientSettings.create(context.getSystem()).getClientsAmount();
-                    ClusterSharding.get(context.getSystem()).init(Entity.of(PuntoSwitcherClient.TYPE_KEY, entityContext -> PuntoSwitcherClient.createClient(context.getSystem(), entityContext.getEntityId()))
-                            .withRole("client"));
-
+                    PuntoSwitcherActor.init(context.getSystem(), "client");
                     for (int i = 0; i < clientsAmount; i++) {
-                        context.spawn(ClientTicker.create(context.getSystem(), i), "ticker-" + i);
+                        context.spawn(PuntoSwitcherClient.createClient(context.getSystem(), Integer.toString(i)), "client-" + i);
                     }
                 }
                 return Behaviors.empty();

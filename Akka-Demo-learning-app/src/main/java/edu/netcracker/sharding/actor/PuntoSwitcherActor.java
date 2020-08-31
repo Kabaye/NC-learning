@@ -35,10 +35,10 @@ public class PuntoSwitcherActor extends AbstractBehavior<Command> {
         this.entityId = entityId;
     }
 
-    public static void init(ActorSystem<?> system) {
+    public static void init(ActorSystem<?> system, String role) {
         ClusterSharding.get(system)
                 .init(Entity.of(TYPE_KEY, entityContext -> PuntoSwitcherActor.create(entityContext.getEntityId()))
-                        .withRole("switcher"));
+                        .withRole(role));
     }
 
     private static Behavior<Command> create(String entityId) {
