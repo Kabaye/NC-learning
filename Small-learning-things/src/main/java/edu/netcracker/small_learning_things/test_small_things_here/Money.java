@@ -11,4 +11,5 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Money {
     private Float amount;
+    private Integer moneyMultiplier;
 }
