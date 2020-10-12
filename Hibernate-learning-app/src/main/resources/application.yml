@@ -6,7 +6,7 @@ spring:
     name: partner-managment-ui-be
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     properties:
@@ -19,10 +19,3 @@ spring:
     url: jdbc:postgresql://localhost:5432/HIBERNATE-TEST
     username: postgres
     password: password
-    hikari:
-      connection-timeout: 20000
-      minimum-idle: 10
-      maximum-pool-size: 10
-      idle-timeout: 10000
-      max-lifetime: 1000
-      auto-commit: true
