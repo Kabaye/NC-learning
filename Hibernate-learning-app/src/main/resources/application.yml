@@ -1,0 +1,28 @@
+server:
+  port: 8880
+
+spring:
+  application:
+    name: partner-managment-ui-be
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/HIBERNATE-TEST
+    username: postgres
+    password: password
+    hikari:
+      connection-timeout: 20000
+      minimum-idle: 10
+      maximum-pool-size: 10
+      idle-timeout: 10000
+      max-lifetime: 1000
+      auto-commit: true
