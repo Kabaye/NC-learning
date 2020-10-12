@@ -1,32 +1,45 @@
-package edu.netcracker.small_learning_things.test_small_things_here;
+package edu.netcracker.small_learning_things.formula_processor;
+
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
+import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "unchecked"})
 public class FormulaProcessor {
-    private final Map<Integer, Function<Map<String, Object>, Number>> formulaMap;
-    private final Map<Class<? extends Number>, Function<Number, Number>> convertResultMap;
+    private final Map<Integer, Function<Map<String, Object>, Object>> formulaMap;
+    private final Map<Class<? extends Number>, Function<Number, Number>> convertNumberResultMap;
 
+    @SneakyThrows
     public FormulaProcessor() {
         formulaMap = new HashMap<>();
-        convertResultMap = new HashMap<>();
-        convertResultMap.put(Float.class, Number::floatValue);
-        convertResultMap.put(Long.class, Number::longValue);
-        convertResultMap.put(Integer.class, Number::intValue);
-        convertResultMap.put(Double.class, Number::doubleValue);
+        convertNumberResultMap = new HashMap<>();
+        convertNumberResultMap.put(Float.class, Number::floatValue);
+        convertNumberResultMap.put(Long.class, Number::longValue);
+        convertNumberResultMap.put(Integer.class, Number::intValue);
+        convertNumberResultMap.put(Double.class, Number::doubleValue);
 
 
         String formula1 = "settlement.revenueShareAmount * charge.chargeCostMny.amount / 100 * 100";
         Integer formulaId1 = 1;
         String formula2 = "charge.chargeCostMny.amount * charge.chargeCostMny.moneyMultiplier";
         Integer formulaId2 = 2;
-        formulaMap.put(formulaId1, createFormula(formula1, Long.class));
+        String formula3 = "charge.chargeType";
+        Integer formulaId3 = 3;
+        String formula4 = "150.55";
+        Integer formulaId4 = 4;
+        String formula5 = "charge.chargeEndDat";
+        Integer formulaId5 = 5;
+        formulaMap.put(formulaId1, createFormula(formula1, Class.forName("java.lang.Long")));
         formulaMap.put(formulaId2, createFormula(formula2, Double.class));
+        formulaMap.put(formulaId3, createFormula(formula3, Class.forName("java.lang.Integer")));
+        formulaMap.put(formulaId4, createFormula(formula4, Float.class));
+        formulaMap.put(formulaId5, createFormula(formula5, ZonedDateTime.class));
 
         Map<String, Object> objectMap = new HashMap<>();
         SettlementORM settlement = new SettlementORM()
@@ -34,15 +47,23 @@ public class FormulaProcessor {
         RBMCharge charge = new RBMCharge()
                 .setChargeCostMny(new Money()
                         .setAmount(25.555F)
-                        .setMoneyMultiplier(1000));
+                        .setMoneyMultiplier(1000))
+                .setChargeType(159)
+                .setChargeEndDat(ZonedDateTime.now().minusDays(2));
 
         objectMap.put("settlement", settlement);
         objectMap.put("charge", charge);
 
-        final Number x = formulaMap.get(1).apply(objectMap);
-        System.out.println(x + " " + x.getClass().equals(Long.class));
-        final Number x1 = formulaMap.get(2).apply(objectMap);
-        System.out.println(x1 + " " + x1.getClass().equals(Double.class));
+        final Object x1 = formulaMap.get(1).apply(objectMap);
+        System.out.println(x1 + " " + x1.getClass().equals(Long.class));
+        final Object x2 = formulaMap.get(2).apply(objectMap);
+        System.out.println(x2 + " " + x2.getClass().equals(Double.class));
+        final Object x3 = formulaMap.get(3).apply(objectMap);
+        System.out.println(x3 + " " + x3.getClass().equals(Class.forName("java.lang.Integer")));
+        final Object x4 = formulaMap.get(4).apply(objectMap);
+        System.out.println(x4 + " " + x4.getClass().equals(Float.class));
+        final Object x5 = formulaMap.get(5).apply(objectMap);
+        System.out.println(x5 + " " + x5.getClass().equals(ZonedDateTime.class));
     }
 
     public static void main(String[] args) {
@@ -63,7 +84,7 @@ public class FormulaProcessor {
         return Character.isLetter(right) || '.' == right;
     }
 
-    private Function<Map<String, Object>, Number> createFormula(String formula, Class<? extends Number> returnType) {
+    private Function<Map<String, Object>, Object> createFormula(String formula, Class<?> returnType) {
         Map<FormulaType, Pair<Function<String, Object>, ArrayDeque<Object>>> map = new HashMap<>();
         String[] parts = formula.split(" ");
 
@@ -89,36 +110,37 @@ public class FormulaProcessor {
         }
 
         return nameObjectMap -> {
-            int j = 3;
+            int j = 1;
 
+            Object objValue;
             Number value;
             Operation operation;
             Number secondOperand;
 
-            value = getValue((FormulaType) types.poll(), constants, variables, nameObjectMap);
-            types.poll();
-            operation = (Operation) operations.poll();
-            secondOperand = getValue((FormulaType) types.poll(), constants, variables, nameObjectMap);
-            value = operation.getOperation().apply(value, secondOperand);
+            objValue = getValue((FormulaType) types.poll(), constants, variables, nameObjectMap);
+            if (formulaPartsLength == 1) {
+                return objValue;
+            }
+            value = (Number) objValue;
             while (j < formulaPartsLength) {
                 types.poll();
                 operation = (Operation) operations.poll();
                 FormulaType formulaType = (FormulaType) types.poll();
-                secondOperand = getValue(formulaType, constants, variables, nameObjectMap);
+                secondOperand = (Number) getValue(formulaType, constants, variables, nameObjectMap);
                 value = operation.getOperation().apply(value, secondOperand);
                 j += 2;
             }
 
-            return convertResultMap.get(returnType).apply(value);
+            return convertNumberResultMap.get(returnType).apply(value);
         };
     }
 
-    private Number getValue(FormulaType formulaType, ArrayDeque<Object> constants, ArrayDeque<Object> variables, Map<String, Object> nameObjectMap) {
+    private Object getValue(FormulaType formulaType, ArrayDeque<Object> constants, ArrayDeque<Object> variables, Map<String, Object> nameObjectMap) {
         switch (formulaType) {
             case CONSTANT:
-                return (Number) constants.poll();
+                return constants.poll();
             case VARIABLE:
-                return ((Function<Map<String, Object>, Number>) Objects.requireNonNull(variables.poll())).apply(nameObjectMap);
+                return ((Function<Map<String, Object>, Object>) Objects.requireNonNull(variables.poll())).apply(nameObjectMap);
         }
         throw new RuntimeException("Wrong formula type!");
     }
@@ -131,7 +153,7 @@ public class FormulaProcessor {
         return Float.parseFloat(constant);
     }
 
-    private Function<Map<String, Object>, Number> processVariable(String variable) {
+    private Function<Map<String, Object>, Object> processVariable(String variable) {
         return values -> {
             String[] tokens = variable.split("\\.");
             Object object = values.get(tokens[0]);
@@ -147,7 +169,7 @@ public class FormulaProcessor {
                 }
                 i++;
             }
-            return (Number) object;
+            return object;
         };
     }
 }

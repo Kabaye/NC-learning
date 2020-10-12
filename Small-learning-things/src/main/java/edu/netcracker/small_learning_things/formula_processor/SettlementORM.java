@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.test_small_things_here;
+package edu.netcracker.small_learning_things.formula_processor;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -9,6 +9,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class RBMCharge {
-    private Money chargeCostMny;
+public class SettlementORM {
+    private Integer revenueShareAmount;
 }

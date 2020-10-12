@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.test_small_things_here;
+package edu.netcracker.small_learning_things.formula_processor;
 
 /**
  * @author svku0919
