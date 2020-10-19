@@ -2,10 +2,8 @@ package edu.netcracker.hibernate.entity;
 
 import edu.netcracker.hibernate.entity.enumirate.ChargeType;
 import edu.netcracker.hibernate.entity.enumirate.SettlementEvent;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,9 +18,7 @@ import javax.persistence.Table;
 @Table(name = "settlements")
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Accessors(chain = true)
 public class SettlementORM {
     @Id
     @Column(name = "settlement_id")
@@ -44,5 +40,4 @@ public class SettlementORM {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pp_id")
     private ProgramProductORM product;
-
 }

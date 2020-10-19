@@ -1,11 +1,7 @@
 package edu.netcracker.hibernate.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,16 +11,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import java.util.StringJoiner;
 
 @Table(name = "partners_product_families")
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EqualsAndHashCode
+@Data
+@Accessors(chain = true)
+@NamedQueries({@NamedQuery(name = "ProductFamilyORM.findAll", query = "SELECT pf FROM ProductFamilyORM pf")})
 public class ProductFamilyORM {
 
     @Id
@@ -38,7 +34,16 @@ public class ProductFamilyORM {
     @Column(name = "product_family_name")
     private String productFamilyName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "partner_id")
     private PartnerORM partner;
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ProductFamilyORM.class.getSimpleName() + "[", "]")
+                .add("ppfId = " + ppfId)
+                .add("productFamilyId = " + productFamilyId)
+                .add("productFamilyName = '" + productFamilyName + "'")
+                .toString();
+    }
 }

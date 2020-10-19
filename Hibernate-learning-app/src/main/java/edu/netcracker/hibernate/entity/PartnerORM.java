@@ -1,33 +1,33 @@
 package edu.netcracker.hibernate.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import java.util.List;
+import java.util.StringJoiner;
 
-@Table(
-        name = "partners",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"customer_ref", "account_num"})
-        }
-)
+
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EqualsAndHashCode
+@Data
+@Accessors(chain = true)
+@Table(name = "partners", uniqueConstraints = {@UniqueConstraint(columnNames = {"customer_ref", "account_num"})})
+@NamedQueries({@NamedQuery(name = "PartnerORM.findAll", query = "SELECT p FROM PartnerORM p")})
 public class PartnerORM {
 
     @Id
@@ -47,8 +47,27 @@ public class PartnerORM {
     @Column(name = "icon")
     private String icon;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "retailer_id")
+    private RetailerORM retailer;
 
-    @Column(name = "retailer_id")
-    private Integer retailerId;
+    @OneToMany(mappedBy = "partner")
+    private List<ProgramProductORM> programProducts;
 
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
+    private List<ProductFamilyORM> productFamilies;
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PartnerORM.class.getSimpleName() + "[", "]")
+                .add("partnerId = " + partnerId)
+                .add("partnerName = '" + partnerName + "'")
+                .add("customerRef = '" + customerRef + "'")
+                .add("accountNum = '" + accountNum + "'")
+                .add("icon = '" + icon + "'")
+//                .add("programProducts = " + programProducts)
+                .add("productFamilies = " + productFamilies)
+                .toString();
+    }
 }
