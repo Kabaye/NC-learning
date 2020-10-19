@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.StringJoiner;
 
 @Table(name = "settlements")
 @Entity
@@ -40,4 +41,15 @@ public class SettlementORM {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pp_id")
     private ProgramProductORM product;
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SettlementORM.class.getSimpleName() + "[", "]")
+                .add("settlementId = " + settlementId)
+                .add("settlementEvent = " + settlementEvent)
+                .add("chargeType = " + chargeType)
+                .add("fixedAmount = " + fixedAmount)
+                .add("revenueShareAmount = " + revenueShareAmount)
+                .toString();
+    }
 }

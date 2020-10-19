@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.List;
+import java.util.StringJoiner;
 
 @Table(name = "retailers")
 @Entity
@@ -41,4 +42,15 @@ public class RetailerORM {
 
     @OneToMany(mappedBy = "retailer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private List<PartnerORM> partners;
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RetailerORM.class.getSimpleName() + "[", "]")
+                .add("retailerId = " + retailerId)
+                .add("email = '" + email + "'")
+                .add("password = '" + password + "'")
+                .add("icon = '" + icon + "'")
+                .add("name = '" + name + "'")
+                .toString();
+    }
 }

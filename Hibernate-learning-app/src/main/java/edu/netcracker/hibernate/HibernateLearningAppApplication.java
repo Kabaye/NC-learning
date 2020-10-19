@@ -2,9 +2,16 @@ package edu.netcracker.hibernate;
 
 import edu.netcracker.hibernate.dao.DAO;
 import edu.netcracker.hibernate.dao.PartnerProductFamilyDao;
+import edu.netcracker.hibernate.dao.ProgramDao;
 import edu.netcracker.hibernate.entity.PartnerORM;
 import edu.netcracker.hibernate.entity.ProductFamilyORM;
+import edu.netcracker.hibernate.entity.ProgramORM;
+import edu.netcracker.hibernate.entity.ProgramProductORM;
 import edu.netcracker.hibernate.entity.RetailerORM;
+import edu.netcracker.hibernate.entity.SettlementORM;
+import edu.netcracker.hibernate.entity.enumirate.ChargeType;
+import edu.netcracker.hibernate.entity.enumirate.PartnerType;
+import edu.netcracker.hibernate.entity.enumirate.SettlementEvent;
 import edu.netcracker.hibernate.repository.PartnerRepository;
 import edu.netcracker.hibernate.repository.ProductFamilyRepository;
 import edu.netcracker.hibernate.repository.ProgramProductRepository;
@@ -14,6 +21,8 @@ import edu.netcracker.hibernate.repository.SettlementRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
@@ -21,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootApplication
 public class HibernateLearningAppApplication {
-    private RetailerRepository retailerRepository;
+    private final RetailerRepository retailerRepository;
 
     private ProgramRepository programRepository;
 
@@ -37,6 +46,8 @@ public class HibernateLearningAppApplication {
 
     private PartnerProductFamilyDao partnerProductFamilyDao;
 
+    private ProgramDao programDao;
+
     public HibernateLearningAppApplication(RetailerRepository retailerRepository,
                                            ProgramRepository programRepository,
                                            ProgramProductRepository programProductRepository,
@@ -44,7 +55,7 @@ public class HibernateLearningAppApplication {
                                            ProductFamilyRepository productFamilyRepository,
                                            SettlementRepository settlementRepository,
                                            DAO<PartnerORM, Integer> partnerDao,
-                                           PartnerProductFamilyDao partnerProductFamilyDao) {
+                                           PartnerProductFamilyDao partnerProductFamilyDao, ProgramDao programDao) {
         this.retailerRepository = retailerRepository;
         this.programRepository = programRepository;
         this.programProductRepository = programProductRepository;
@@ -53,317 +64,16 @@ public class HibernateLearningAppApplication {
         this.settlementRepository = settlementRepository;
         this.partnerDao = partnerDao;
         this.partnerProductFamilyDao = partnerProductFamilyDao;
+        this.programDao = programDao;
 
+//        checkSaveUpdatePartner();
 
-//        AtomicInteger productId = new AtomicInteger(0);
-//        AtomicInteger partnerId = new AtomicInteger(0);
-//
-//        RetailerORM retailerORM = new RetailerORM()
-//                .setEmail(ThreadLocalRandom.current().ints().limit(2).collect(() -> new StringJoiner(""),
-//                        (stringJoiner, value) -> stringJoiner.add(Integer.toString(value)), StringJoiner::merge).toString())
-//                .setIcon("icon")
-//                .setName("name")
-//                .setPassword("password");
-//
-//        retailerORM = retailerRepository.save(retailerORM);
-//
-//        List<ProductFamilyORM> productFamilies1 = Arrays.asList(new ProductFamilyORM()
-//                .setPpfId(9)
-//                        .setProductFamilyId(1)
-//                        .setProductFamilyName("ppf 1"),
-//                new ProductFamilyORM()
-//                        .setProductFamilyId(2)
-//                        .setProductFamilyName("ppf 2"));
-//
-//        List<ProductFamilyORM> productFamilies2 = Arrays.asList(new ProductFamilyORM()
-//                        .setPpfId(11)
-//                        .setProductFamilyId(1)
-//                        .setProductFamilyName("ppf 1"),
-//                new ProductFamilyORM()
-//                        .setProductFamilyId(2)
-//                        .setProductFamilyName("ppf 2"));
-//
-//        List<ProductFamilyORM> productFamilies3 = Arrays.asList(new ProductFamilyORM()
-//                        .setPpfId(9)
-//                        .setProductFamilyId(1)
-//                        .setProductFamilyName("ppf 1"),
-//                new ProductFamilyORM()
-//                        .setProductFamilyId(2)
-//                        .setProductFamilyName("ppf 2"));
-//
-//        List<PartnerORM> partners = Arrays.asList(
-//                new PartnerORM()
-//                        .setAccountNum("partner1 acc")
-//                        .setCustomerRef("partner1 custRef")
-//                        .setIcon("icon")
-//                        .setPartnerName("name 1")
-//                        .setProductFamilies(
-//                                productFamilies1)
-//                        .setRetailer(retailerORM),
-//                new PartnerORM()
-//                        .setAccountNum("partner2 acc")
-//                        .setCustomerRef("partner2 custRef")
-//                        .setIcon("icon")
-//                        .setPartnerName("name 2")
-//                        .setProductFamilies(
-//                                productFamilies2)
-//                        .setRetailer(retailerORM),
-//                new PartnerORM()
-//                        .setAccountNum("partner3 acc")
-//                        .setCustomerRef("partner3 custRef")
-//                        .setIcon("icon")
-//                        .setPartnerName("name 3")
-//                        .setProductFamilies(
-//                                productFamilies3)
-//                        .setRetailer(retailerORM));
-//
-//        List<PartnerORM> finalPartners = partners;
-//        productFamilies1.forEach(productFamilyORM -> productFamilyORM.setPartner(finalPartners.get(partnerId.get())));
-//        partnerId.incrementAndGet();
-//        productFamilies2.forEach(productFamilyORM -> productFamilyORM.setPartner(finalPartners.get(partnerId.get())));
-//        partnerId.incrementAndGet();
-//        productFamilies3.forEach(productFamilyORM -> productFamilyORM.setPartner(finalPartners.get(partnerId.get())));
-//
-//        partners = partnerDao.saveAll(partners);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//        List<List<ProgramProductORM>> programProducts = Arrays.asList(Arrays.asList(
-//                new ProgramProductORM()
-//                        .setLabel("label 1")
-//                        .setPartnerType(PartnerType.Retail)
-//                        .setProductId(productId.getAndIncrement())
-//                        .setSettlements(Arrays.asList(
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.BILL)
-//                                        .setChargeType(ChargeType.TERMINATION)
-//                                        .setFixedAmount(123.5)
-//                                        .setRevenueShareAmount(1),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PAY)
-//                                        .setChargeType(ChargeType.ACTIVATION)
-//                                        .setFixedAmount(456.85)
-//                                        .setRevenueShareAmount(3),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                        .setChargeType(ChargeType.USAGE)
-//                                        .setFixedAmount(756.2)
-//                                        .setRevenueShareAmount(2))),
-//                new ProgramProductORM()
-//                        .setLabel("label 2")
-//                        .setPartnerType(PartnerType.ServicePartner)
-//                        .setProductId(productId.getAndIncrement())
-//                        .setSettlements(Arrays.asList(
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.BILL)
-//                                        .setChargeType(ChargeType.TERMINATION)
-//                                        .setFixedAmount(753.5)
-//                                        .setRevenueShareAmount(4),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PAY)
-//                                        .setChargeType(ChargeType.ACTIVATION)
-//                                        .setFixedAmount(12.5)
-//                                        .setRevenueShareAmount(5),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                        .setChargeType(ChargeType.USAGE)
-//                                        .setFixedAmount(756.2)
-//                                        .setRevenueShareAmount(6))),
-//                new ProgramProductORM()
-//                        .setLabel("label 3")
-//                        .setPartnerType(PartnerType.Sponsor)
-//                        .setProductId(productId.getAndIncrement())
-//                        .setSettlements(Arrays.asList(
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.BILL)
-//                                        .setChargeType(ChargeType.TERMINATION)
-//                                        .setFixedAmount(9436.5)
-//                                        .setRevenueShareAmount(7),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PAY)
-//                                        .setChargeType(ChargeType.ACTIVATION)
-//                                        .setFixedAmount(1452.35)
-//                                        .setRevenueShareAmount(8),
-//                                new SettlementORM()
-//                                        .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                        .setChargeType(ChargeType.USAGE)
-//                                        .setFixedAmount(15.22)
-//                                        .setRevenueShareAmount(9)))
-//                ),
-//                Arrays.asList(
-//                        new ProgramProductORM()
-//                                .setLabel("label 4")
-//                                .setPartnerType(PartnerType.Retail)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(123.5)
-//                                                .setRevenueShareAmount(10),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(456.85)
-//                                                .setRevenueShareAmount(11),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(756.2)
-//                                                .setRevenueShareAmount(12))),
-//                        new ProgramProductORM()
-//                                .setLabel("label 5")
-//                                .setPartnerType(PartnerType.ServicePartner)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(753.5)
-//                                                .setRevenueShareAmount(13),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(12.5)
-//                                                .setRevenueShareAmount(14),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(756.2)
-//                                                .setRevenueShareAmount(15))),
-//                        new ProgramProductORM()
-//                                .setLabel("label 6")
-//                                .setPartnerType(PartnerType.Sponsor)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(9436.5)
-//                                                .setRevenueShareAmount(16),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(1452.35)
-//                                                .setRevenueShareAmount(17),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(15.22)
-//                                                .setRevenueShareAmount(18)))
-//                ), Arrays.asList(
-//                        new ProgramProductORM()
-//                                .setLabel("label 7")
-//                                .setPartnerType(PartnerType.Retail)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(123.5)
-//                                                .setRevenueShareAmount(19),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(456.85)
-//                                                .setRevenueShareAmount(20),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(756.2)
-//                                                .setRevenueShareAmount(21))),
-//                        new ProgramProductORM()
-//                                .setLabel("label 8")
-//                                .setPartnerType(PartnerType.ServicePartner)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(753.5)
-//                                                .setRevenueShareAmount(22),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(12.5)
-//                                                .setRevenueShareAmount(23),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(756.2)
-//                                                .setRevenueShareAmount(24))),
-//                        new ProgramProductORM()
-//                                .setLabel("label 9")
-//                                .setPartnerType(PartnerType.Sponsor)
-//                                .setProductId(productId.getAndIncrement())
-//                                .setSettlements(Arrays.asList(
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.BILL)
-//                                                .setChargeType(ChargeType.TERMINATION)
-//                                                .setFixedAmount(9436.5)
-//                                                .setRevenueShareAmount(25),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PAY)
-//                                                .setChargeType(ChargeType.ACTIVATION)
-//                                                .setFixedAmount(1452.35)
-//                                                .setRevenueShareAmount(26),
-//                                        new SettlementORM()
-//                                                .setSettlementEvent(SettlementEvent.PURCHASE)
-//                                                .setChargeType(ChargeType.USAGE)
-//                                                .setFixedAmount(15.22)
-//                                                .setRevenueShareAmount(27)))
-//                ));
-//
-//        AtomicInteger i = new AtomicInteger();
-//        List<ProgramORM> programs = Arrays.asList(
-//                new ProgramORM()
-//                        .setName("pr1 name")
-//                        .setEndDate(Instant.now().plus(Duration.ofDays(5)))
-//                        .setStartDate(Instant.now().plus(Duration.ofHours(2)))
-//                        .setRetailerProductId(1)
-//                        .setProgramProducts(programProducts.get(0)
-//                                .stream()
-//                                .peek(programProductORM -> programProductORM.setPartner(finalPartners.get(i.get() == 2 ? i.getAndSet(0) : i.getAndIncrement())))
-//                                .collect(Collectors.toList()))
-//                        .setRetailer(retailerORM),
-//                new ProgramORM()
-//                        .setName("pr2 name")
-//                        .setEndDate(Instant.now().plus(Duration.ofDays(5)))
-//                        .setStartDate(Instant.now().plus(Duration.ofHours(2)))
-//                        .setRetailerProductId(2)
-//                        .setProgramProducts(programProducts.get(1).stream()
-//                                .peek(programProductORM -> programProductORM.setPartner(finalPartners.get(i.get() == 2 ? i.getAndSet(0) : i.getAndIncrement())))
-//                                .collect(Collectors.toList()))
-//                        .setRetailer(retailerORM),
-//                new ProgramORM()
-//                        .setName("pr3 name")
-//                        .setEndDate(Instant.now().plus(Duration.ofDays(5)))
-//                        .setStartDate(Instant.now().plus(Duration.ofHours(2)))
-//                        .setRetailerProductId(3)
-//                        .setProgramProducts(programProducts.get(2).stream()
-//                                .peek(programProductORM -> programProductORM.setPartner(finalPartners.get(i.get() == 2 ? i.getAndSet(0) : i.getAndIncrement())))
-//                                .collect(Collectors.toList()))
-//                        .setRetailer(retailerORM)
-//        );
-//
-//        programRepository.saveAll(programs);
+        checkSaveUpdateDeleteProgram();
+    }
 
+    private void checkSaveUpdatePartner() {
         RetailerORM retailerORM = new RetailerORM()
-                .setEmail(ThreadLocalRandom.current().ints().limit(2).collect(() -> new StringJoiner(""),
-                        (stringJoiner, value) -> stringJoiner.add(Integer.toString(value)), StringJoiner::merge).toString())
+                .setEmail(getRandomNumericString())
                 .setIcon("icon")
                 .setName("name")
                 .setPassword("password");
@@ -389,14 +99,7 @@ public class HibernateLearningAppApplication {
 
         partnerORM.setProductFamilies(productFamilies);
 
-        partnerORM = partnerDao.save(partnerORM);
-
-        System.out.println("***************************************");
-        System.out.println("After save!");
-
-        System.out.println(partnerDao.findAll());
-
-        System.out.println(partnerProductFamilyDao.findAll());
+        partnerORM = partnerRepository.save(partnerORM);
 
         List<ProductFamilyORM> productFamilies2 = Arrays.asList(new ProductFamilyORM()
                         .setProductFamilyId(35)
@@ -412,23 +115,205 @@ public class HibernateLearningAppApplication {
                 .setPartnerName("Hello!")
                 .setProductFamilies(productFamilies2);
 
-        partnerORM = partnerDao.update(partnerORM);
-        System.out.println();
-        System.out.println("***************************************");
-        System.out.println("After update!");
+        partnerORM = partnerRepository.save(partnerORM);
 
-        System.out.println(partnerDao.findAll());
+        partnerRepository.deleteById(partnerORM.getPartnerId());
 
-        System.out.println(partnerProductFamilyDao.findAll());
+    }
 
-        partnerDao.delete(partnerORM.getPartnerId());
+    private void checkSaveUpdateDeleteProgram() {
+        RetailerORM retailerORM = new RetailerORM()
+                .setEmail(getRandomNumericString())
+                .setIcon("icon")
+                .setName("name")
+                .setPassword("password");
 
-        System.out.println();
-        System.out.println("***************************************");
-        System.out.println("After delete!");
-        System.out.println(partnerDao.findAll());
+        retailerORM = retailerRepository.save(retailerORM);
 
-        System.out.println(partnerProductFamilyDao.findAll());
+        PartnerORM partnerORM = new PartnerORM()
+                .setAccountNum("partner1 acc")
+                .setCustomerRef("partner1 custRef")
+                .setIcon("icon")
+                .setPartnerName("name 1")
+                .setRetailer(retailerORM);
+
+        List<ProductFamilyORM> productFamilies = Arrays.asList(new ProductFamilyORM()
+                        .setProductFamilyId(1)
+                        .setProductFamilyName("family Name 1")
+                        .setPartner(partnerORM),
+                new ProductFamilyORM()
+                        .setProductFamilyId(11)
+                        .setProductFamilyName("family name 12")
+                        .setPartner(partnerORM));
+
+        partnerORM.setProductFamilies(productFamilies);
+
+        partnerORM = partnerRepository.save(partnerORM);
+
+        ProgramORM programORM = new ProgramORM()
+                .setName("pr1 name")
+                .setEndDate(Instant.now().plus(Duration.ofDays(5)))
+                .setStartDate(Instant.now().minus(Duration.ofHours(2)))
+                .setRetailerProductId(1)
+                .setRetailer(retailerORM);
+
+        List<ProgramProductORM> programProducts = Arrays.asList(
+                new ProgramProductORM()
+                        .setLabel("label 7")
+                        .setPartnerType(PartnerType.Retail)
+                        .setProductId(1)
+                        .setProgram(programORM)
+                        .setPartner(partnerORM),
+                new ProgramProductORM()
+                        .setLabel("label 8")
+                        .setPartnerType(PartnerType.ServicePartner)
+                        .setProductId(2)
+                        .setProgram(programORM)
+                        .setPartner(partnerORM),
+                new ProgramProductORM()
+                        .setLabel("label 9")
+                        .setPartnerType(PartnerType.Sponsor)
+                        .setProductId(3)
+                        .setProgram(programORM)
+                        .setPartner(partnerORM)
+        );
+        final List<SettlementORM> settlements1 = Arrays.asList(
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.BILL)
+                        .setChargeType(ChargeType.TERMINATION)
+                        .setFixedAmount(123.5)
+                        .setRevenueShareAmount(19)
+                        .setProduct(programProducts.get(0)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PAY)
+                        .setChargeType(ChargeType.ACTIVATION)
+                        .setFixedAmount(456.85)
+                        .setRevenueShareAmount(20)
+                        .setProduct(programProducts.get(0)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PURCHASE)
+                        .setChargeType(ChargeType.USAGE)
+                        .setFixedAmount(756.2)
+                        .setRevenueShareAmount(21)
+                        .setProduct(programProducts.get(0)));
+        final List<SettlementORM> settlements2 = Arrays.asList(
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.BILL)
+                        .setChargeType(ChargeType.TERMINATION)
+                        .setFixedAmount(753.5)
+                        .setRevenueShareAmount(22)
+                        .setProduct(programProducts.get(1)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PAY)
+                        .setChargeType(ChargeType.ACTIVATION)
+                        .setFixedAmount(12.5)
+                        .setRevenueShareAmount(23)
+                        .setProduct(programProducts.get(1)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PURCHASE)
+                        .setChargeType(ChargeType.OTS)
+                        .setFixedAmount(756.2)
+                        .setRevenueShareAmount(24)
+                        .setProduct(programProducts.get(1)));
+        final List<SettlementORM> settlements3 = Arrays.asList(
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.BILL)
+                        .setChargeType(ChargeType.TERMINATION)
+                        .setFixedAmount(9436.5)
+                        .setRevenueShareAmount(25)
+                        .setProduct(programProducts.get(2)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PAY)
+                        .setChargeType(ChargeType.OTS)
+                        .setFixedAmount(1452.35)
+                        .setRevenueShareAmount(26)
+                        .setProduct(programProducts.get(2)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PURCHASE)
+                        .setChargeType(ChargeType.USAGE)
+                        .setFixedAmount(15.22)
+                        .setRevenueShareAmount(27)
+                        .setProduct(programProducts.get(2)));
+
+        programProducts.get(0).setSettlements(settlements1);
+        programProducts.get(1).setSettlements(settlements2);
+        programProducts.get(2).setSettlements(settlements3);
+
+        programORM.setProgramProducts(programProducts);
+
+        programORM = programRepository.save(programORM);
+
+        List<ProgramProductORM> programProducts2 = Arrays.asList(
+                new ProgramProductORM()
+                        .setLabel("label new 1")
+                        .setPartnerType(PartnerType.ServicePartner)
+                        .setProductId(100)
+                        .setProgram(programORM)
+                        .setPartner(partnerORM),
+                new ProgramProductORM()
+                        .setLabel("label new 1")
+                        .setPartnerType(PartnerType.Sponsor)
+                        .setProductId(200)
+                        .setProgram(programORM)
+                        .setPartner(partnerORM)
+        );
+        final List<SettlementORM> settlements4 = Arrays.asList(
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.BILL)
+                        .setChargeType(ChargeType.TERMINATION)
+                        .setFixedAmount(123.5)
+                        .setRevenueShareAmount(19)
+                        .setProduct(programProducts2.get(0)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PAY)
+                        .setChargeType(ChargeType.TERMINATION)
+                        .setFixedAmount(12.5666)
+                        .setRevenueShareAmount(10)
+                        .setProduct(programProducts2.get(0)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PURCHASE)
+                        .setChargeType(ChargeType.USAGE)
+                        .setFixedAmount(756.2)
+                        .setRevenueShareAmount(11)
+                        .setProduct(programProducts2.get(0)));
+
+        final List<SettlementORM> settlements5 = Arrays.asList(
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.BILL)
+                        .setChargeType(ChargeType.USAGE)
+                        .setFixedAmount(753.5)
+                        .setRevenueShareAmount(12555)
+                        .setProduct(programProducts2.get(1)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PAY)
+                        .setChargeType(ChargeType.USAGE)
+                        .setFixedAmount(12.5)
+                        .setRevenueShareAmount(222)
+                        .setProduct(programProducts2.get(1)),
+                new SettlementORM()
+                        .setSettlementEvent(SettlementEvent.PURCHASE)
+                        .setChargeType(ChargeType.RECURRING)
+                        .setFixedAmount(756.2)
+                        .setRevenueShareAmount(24563)
+                        .setProduct(programProducts2.get(1)));
+
+        programProducts2.get(0).setSettlements(settlements4);
+        programProducts2.get(1).setSettlements(settlements5);
+
+        programORM.setName("new name 2.0")
+                .setEndDate(Instant.now().plus(Duration.ofDays(15)))
+                .setStartDate(Instant.now().minus(Duration.ofDays(10)))
+                .setRetailerProductId(6666)
+                .setProgramProducts(programProducts2);
+
+        programORM = programRepository.save(programORM);
+
+        programRepository.deleteById(programORM.getProgramId());
+    }
+
+    private String getRandomNumericString() {
+        return ThreadLocalRandom.current().ints().limit(2).collect(() -> new StringJoiner(""),
+                (stringJoiner, value) -> stringJoiner.add(Integer.toString(value)), StringJoiner::merge).toString();
     }
 
     public static void main(String[] args) {

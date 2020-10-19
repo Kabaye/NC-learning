@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.List;
+import java.util.StringJoiner;
 
 @Table(name = "program_products")
 @Entity
@@ -48,4 +49,14 @@ public class ProgramProductORM {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SettlementORM> settlements;
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ProgramProductORM.class.getSimpleName() + "[", "]")
+                .add("ppId = " + ppId)
+                .add("productId = " + productId)
+                .add("label = '" + label + "'")
+                .add("partnerType = " + partnerType)
+                .add("settlements = " + settlements)
+                .toString();
+    }
 }
