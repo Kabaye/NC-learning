@@ -12,12 +12,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BinaryOperator;
 
 @Component
 public class DefaultWebClient {
@@ -44,17 +41,18 @@ public class DefaultWebClient {
     }
 
     public Mono<Pair<Map<Currency, Double>, Currency>> getCurrentExchangeRates() {
-        return getCurrentExchangeRates(Currency.USD, Arrays.asList(Currency.values()));
+        return getCurrentExchangeRates(Currency.EUR, Arrays.asList(Currency.values()));
     }
 
-    private Mono<Pair<Map<Currency, Double>, Currency>> getCurrentExchangeRates(Currency baseCurrency, List<Currency> neededCurrencies) {
+    public Mono<Pair<Map<Currency, Double>, Currency>> getCurrentExchangeRates(Currency baseCurrency, List<Currency> neededCurrencies) {
         Pair<Map<Currency, Double>, Currency> pair = Pair.of(new HashMap<>(), baseCurrency);
-        return WebClient.create("https://api.exchangeratesapi.io/latest")
+        String uri = UriComponentsBuilder.newInstance()
+                .queryParam("symbols", neededCurrencies.stream().reduce(new StringJoiner(""), (stringJoiner, currency) -> stringJoiner.add(",").add(currency.name()), StringJoiner::merge))
+                .queryParam("access_key", "cc7de3d2db06c213960df4e8c18a9d5e")
+                .toUriString();
+        return WebClient.create("http://api.exchangeratesapi.io/v1/latest")
                 .get()
-                .uri(UriComponentsBuilder.newInstance()
-                        .queryParam("base", baseCurrency.name())
-                        .queryParam("symbols", neededCurrencies)
-                        .toUriString())
+                .uri(uri)
                 .exchange()
                 .flatMap(clientResponse -> clientResponse.bodyToMono(String.class))
                 .map(s -> {

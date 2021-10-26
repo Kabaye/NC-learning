@@ -41,7 +41,7 @@ public class OrderService {
         this.productService = productService;
         this.defaultWebClient = defaultWebClient;
 
-        Flux.interval(Duration.ofSeconds(0), Duration.ofHours(3), Schedulers.single())
+        Flux.interval(Duration.ofSeconds(0), Duration.ofHours(6), Schedulers.single())
                 .flatMap(obj -> defaultWebClient.getCurrentExchangeRates())
                 .doOnNext(rates::set)
                 .subscribe();
@@ -80,7 +80,8 @@ public class OrderService {
                                 productIntegerPair.getFirst().getId(), productIntegerPair.getSecond()))
                         .collect(Collectors.toList()))
                         .then(Mono.just(ord)))
-                .map(postProcessOrderFromDB);
+                .map(postProcessOrderFromDB)
+                .map(postProcessOrderPriceToCustomerCurrency);
     }
 
     public Mono<Order> updateOrder(Integer id, Order order) {

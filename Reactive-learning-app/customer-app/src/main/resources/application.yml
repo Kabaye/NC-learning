@@ -3,8 +3,9 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/CUSTOMER-APP
-    username: postgres
+    url: r2dbc:postgresql://localhost:5432/loader_db
+    username: dbaas_7b93a74a9a204326bcd2848465ffb915
+    password: f86a0f9c38f84feab5bdbeb3a6a21e77
 
 management:
   metrics:
