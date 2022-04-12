@@ -2,6 +2,7 @@ package com.netcracker;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.HashMap;
@@ -34,16 +35,17 @@ public class GroovyTemplateEngineApplication {
                 }
                 """;
 
-//        def writer = new StringWriter()
-//        def html = new MarkupBuilder(writer)
-//        html.html{
-//            head {
-//                title 'Simple document'
-//            }
-//        }
-//        prin
+
         String ncVlrNumber = """
-                return new Random().nextInt(10000000)
+                        import groovy.xml.*
+                        def writer = new StringWriter()
+                        def html = new MarkupBuilder(writer)
+                        html.html{
+                            head {
+                                title 'Simple document'
+                            }
+                        }
+                        return writer.toString()
                 """;
         String ncMscAddress = """
                 def generator = { String alphabet, int n ->
@@ -82,7 +84,7 @@ public class GroovyTemplateEngineApplication {
 
         Map<String, Object> context = new HashMap<>();
         context.put("Country", "Belarus");
-        context.put("isMSC", true);
+        context.put("isMSC", false);
 
         Map<String, String> scripts = new HashMap<>();
         scripts.put("NC-Roaming-Indicator", ncRoamingIndicator);
@@ -98,6 +100,18 @@ public class GroovyTemplateEngineApplication {
         Object evaluate = shell.evaluate(groovyScript);
 
         System.out.println(evaluate);
+
+
+        Script script = shell.parse("""
+                if (true) {
+                rturn "exxxxxx"
+                } else {
+                rturn 'xxx'
+                }
+                """);
+
+        Object run = script.run();
+        System.out.println(run);
 
     }
 
