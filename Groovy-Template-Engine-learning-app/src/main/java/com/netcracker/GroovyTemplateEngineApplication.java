@@ -1,20 +1,26 @@
 package com.netcracker;
 
 import groovy.lang.Binding;
+import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import groovy.text.GStringTemplateEngine;
+import lombok.SneakyThrows;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
 public class GroovyTemplateEngineApplication {
 
+ @SneakyThrows
     public static void main(String[] args) {
 //        SpringApplication.run(GroovyTemplateEngineApplication.class, args);
         String template = """
-                <command name='CCR-I'>
+                 <command name='CCR-I'>
                 	<avp name='NC-Roaming-Indicator' value='${calc.call('NC-Roaming-Indicator')}'/>
                 	<avp name='NC-Call-Direction' value='O'/>
                  	<avp name='NC-Premium-Indicator' value='F'/>
@@ -29,7 +35,7 @@ public class GroovyTemplateEngineApplication {
                 """;
         String ncRoamingIndicator = """
                 if (context['Country'] == 'Hong Kong') {
-                    return 'F'
+                    return 23 * context['number']
                 } else {
                     return 'T'
                 }
@@ -59,7 +65,7 @@ public class GroovyTemplateEngineApplication {
         String groovyScript = """
                     import groovy.text.GStringTemplateEngine
                     import com.netcracker.ScriptService
-                    
+
                     def calc = { String scriptName ->
                         def scriptService = binding.getVariable('scriptService') as ScriptService
                         def script = scriptService.getScript(scriptName)
@@ -69,22 +75,31 @@ public class GroovyTemplateEngineApplication {
                                 head += "def ${e.key} = ${e.value.inspect()}\\n"
                             }
                         }
-                        def result = new GroovyShell().evaluate(head + script)
-                        return result
+                        try{
+                            return new GroovyShell().evaluate(head + script)
+                        } catch (Exception e){
+                            throw e
+                        }
                     }
-                    
+
                     engine = new GStringTemplateEngine()
                     tpl = engine.createTemplate(binding.getVariable('template') as String)
                             .make([
                                     'calc': calc,
                                     'context': binding.getVariable('context')
                             ])
-                    return tpl.toString()
+                    try{
+                    return tpl.toString()}
+                    catch(Exception e){
+                    println('xxxxxxxx')
+
+                    println(e);return e;}
                 """;
 
         Map<String, Object> context = new HashMap<>();
-        context.put("Country", "Belarus");
+        context.put("Country", "Hong Kong");
         context.put("isMSC", false);
+        context.put("number", "sss");
 
         Map<String, String> scripts = new HashMap<>();
         scripts.put("NC-Roaming-Indicator", ncRoamingIndicator);
@@ -98,21 +113,36 @@ public class GroovyTemplateEngineApplication {
         binding.setProperty("scriptService", (ScriptService) scripts::get);
         binding.setProperty("context", context);
         Object evaluate = shell.evaluate(groovyScript);
-
         System.out.println(evaluate);
 
-
-        Script script = shell.parse("""
-                if (true) {
-                rturn "exxxxxx"
-                } else {
-                rturn 'xxx'
-                }
-                """);
-
-        Object run = script.run();
-        System.out.println(run);
-
+        try {
+            new GStringTemplateEngine().createTemplate(template);
+        } catch (ClassNotFoundException | IOException | GroovyRuntimeException e) {
+            e.printStackTrace();
+        }
     }
+
+//    public static void main(String[] args) {
+//        String ncVlrNumber = """
+//                        import groovy.xml.*
+//                        def writer = new StringWriter()
+//                        def html = new MarkupBuilder(writer)
+//                        html.html{
+//                            head {
+//                                title 'Simple document'
+//                            }
+//                        }
+//                        return writer.toString
+//                """;
+//        try {
+//            Script script = new GroovyShell().parse(ncVlrNumber, "ncVlrNumber");
+//            System.out.println(script);
+//        } catch (Exception e) {
+//            System.out.println(e);
+//            if (e instanceof CompilationFailedException cfe){
+//                System.out.println(cfe);
+//            }
+//        }
+//    }
 
 }
