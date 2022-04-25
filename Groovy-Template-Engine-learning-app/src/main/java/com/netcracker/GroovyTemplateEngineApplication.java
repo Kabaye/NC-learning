@@ -26,16 +26,14 @@ public class GroovyTemplateEngineApplication {
                  	<avp name='NC-Premium-Indicator' value='F'/>
                  	<avp name='NC-Service-Context-Id' value='32260@3gpp.org'/>
                  	<avp name='NC-Roaming-Indicator' value='F'/>
-                 	<% if (!context['isMSC']) {%>
+                 	<% if (context['isMSC']) {%>
                  	<avp name='NC-VLR-Number' value='${calc.call('NC-VLR-Number')}'/>
-                 	<% } else {%>
-                 	<avp name='NC-MSC-Address' value='${calc.call('NC-MSC-Address')}'/>
-                 	<% } %>
+                 	<%}%>
                 </command>
                 """;
         String ncRoamingIndicator = """
                 if (context['Country'] == 'Hong Kong') {
-                    return 23 * context['number']
+                    return 23 * 12
                 } else {
                     return 'T'
                 }
@@ -98,7 +96,7 @@ public class GroovyTemplateEngineApplication {
 
         Map<String, Object> context = new HashMap<>();
         context.put("Country", "Hong Kong");
-        context.put("isMSC", false);
+        context.put("isMSC", true);
         context.put("number", "sss");
 
         Map<String, String> scripts = new HashMap<>();
