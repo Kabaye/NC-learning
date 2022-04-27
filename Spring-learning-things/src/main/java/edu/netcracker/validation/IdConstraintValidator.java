@@ -1,22 +1,19 @@
 package edu.netcracker.validation;
 
 import edu.netcracker.model.Entity;
-import edu.netcracker.validation.annotation.IdConstraint;
+import edu.netcracker.validation.annotation.IdValid;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author svku0919
  * @version 25.04.2022-15:17
  */
 
-public class IdConstraintValidator implements ConstraintValidator<IdConstraint, Entity> {
+public class IdConstraintValidator implements ConstraintValidator<IdValid, Entity> {
     private final Validator v;
     private boolean idRequired;
 
@@ -39,7 +36,7 @@ public class IdConstraintValidator implements ConstraintValidator<IdConstraint, 
     }
 
     @Override
-    public void initialize(IdConstraint constraintAnnotation) {
+    public void initialize(IdValid constraintAnnotation) {
         idRequired = constraintAnnotation.idRequired();
         ConstraintValidator.super.initialize(constraintAnnotation);
     }

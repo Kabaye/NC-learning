@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ElementType.TYPE, ElementType.PARAMETER, METHOD })
 @Retention(RUNTIME)
 @Documented
-public @interface IdConstraint {
+public @interface IdValid {
     boolean idRequired() default false;
 
     String message() default "Id Constraint violated";

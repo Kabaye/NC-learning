@@ -2,7 +2,7 @@ package edu.netcracker.controller;
 
 import edu.netcracker.model.Entity;
 import edu.netcracker.service.EService;
-import edu.netcracker.validation.annotation.IdConstraint;
+import edu.netcracker.validation.annotation.IdValid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,12 +24,12 @@ public class TestController {
     private EService service;
 
     @PostMapping("/post")
-    public Entity post(@RequestBody @IdConstraint @Valid Entity e) {
+    public Entity post(@RequestBody @IdValid @Valid Entity e) {
         return service.post(e);
     }
 
     @PutMapping("/put")
-    public Entity put(@RequestBody @IdConstraint(idRequired = true) @Valid Entity e) {
+    public Entity put(@RequestBody @IdValid(idRequired = true) @Valid Entity e) {
         return service.put(e);
     }
 }
