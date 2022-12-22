@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 public class TestSmthHere {
     @SneakyThrows
     public static void main(String[] args) {
+        Thread.currentThread().getState()
     }
 
 }
