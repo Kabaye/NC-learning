@@ -7,6 +7,21 @@ package edu.netcracker.small_learning_things.median_of_two_sorted_arrays;
 
 class Solution {
     public static double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        if (nums1.length == 0) {
+            if (nums2.length % 2 == 0) {
+                return (nums2[nums2.length / 2] + nums2[nums2.length / 2 - 1]) / 2.0;
+            } else {
+                return nums2[nums2.length / 2];
+            }
+        }
+        if (nums2.length == 0) {
+            if (nums1.length % 2 == 0) {
+                return (nums1[nums1.length / 2] + nums1[nums1.length / 2 - 1]) / 2.0;
+            } else {
+                return nums1[nums1.length / 2];
+            }
+        }
+
         int startI = 0;
         int endI = nums1.length - 1;
         int i = (endI - startI) / 2;
@@ -23,14 +38,17 @@ class Solution {
             int elemJ = nums2[j];
             if (elemI > elemJ) {
                 endI = i;
-                i = startI + (endI - startI) / 2;
                 startJ = j;
-                j = startJ + (endJ - startJ) / 2;
-            } else {
-                endJ = j;
-                j = startJ + (endJ - startJ) / 2;
+                i = startI + findMiddleIndex(startI, endI, true);
+                j = startJ + findMiddleIndex(startJ, endJ, false);
+            } else if (elemI < elemJ) {
                 startI = i;
-                i = startI + (endI - startI) / 2;
+                endJ = j;
+                i = startI + findMiddleIndex(startI, endI, false);
+                j = startJ + findMiddleIndex(startJ, endJ, true);
+            } else {
+                notFound = false;
+                median = elemI;
             }
 
             if (endI - startI < 1 && !twoMedians) {
@@ -39,9 +57,9 @@ class Solution {
             } else if (endJ - startJ < 1 && !twoMedians) {
                 notFound = false;
                 median = nums2[startJ];
-            } else if (endI - startI < 1 && endJ - startJ < 1) {
+            } else if ((i == startI || i == endI) && (j == startJ || j == endJ)) {
                 notFound = false;
-                median = (nums1[startI] + nums2[startJ]) / 2.0;
+                median = (nums1[i] + nums2[j]) / 2.0;
             }
 
         }
@@ -49,18 +67,18 @@ class Solution {
         return median;
     }
 
-    public static int findMiddleIndex(int startIndex, int endIndex) {
+    public static int findMiddleIndex(int startIndex, int endIndex, boolean nearestReturnZero) {
         if (endIndex - startIndex > 1) {
-            return (endIndex - startIndex) / 2;
+            return (endIndex - startIndex) % 2 == 0 ? (endIndex - startIndex) / 2 : (endIndex - startIndex + 1) / 2;
         } else if (endIndex == startIndex) {
             return 0;
         } else {
-            return 1;
+            return nearestReturnZero ? 0 : 1;
         }
     }
 
     public static void main(String[] args) {
-        double medianSortedArrays = findMedianSortedArrays(new int[]{1, 2, 3, 9, 10, 11, 15}, new int[]{4, 5, 6, 7, 12, 16, 17});
+        double medianSortedArrays = findMedianSortedArrays(new int[]{3}, new int[]{-2, -1});
         System.out.println(medianSortedArrays);
     }
 }
