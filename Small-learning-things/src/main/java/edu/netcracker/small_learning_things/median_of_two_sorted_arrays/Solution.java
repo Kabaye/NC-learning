@@ -13,14 +13,56 @@ class Solution {
             } else {
                 return nums2[nums2.length / 2];
             }
+        } else if (nums1.length == 1 && nums2.length > 1) {
+            int middleLeft2 = nums2[nums2.length / 2 - 1];
+            int middleRight2 = nums2[nums2.length / 2];
+            if (nums2.length % 2 == 0) {
+                if (middleRight2 >= nums1[0] && middleLeft2 <= nums1[0]) {
+                    return nums1[0];
+                } else {
+                    return middleRight2;
+                }
+            } else {
+                if ((middleRight2 >= nums1[0] && middleLeft2 <= nums1[0]) || (middleRight2 <= nums1[0] && nums2[nums2.length / 2 + 1] >= nums1[0])) {
+                    return (nums1[0] + middleRight2) / 2.0;
+                } else if (middleRight2 >= nums1[0]) {
+                    return (nums2[nums2.length / 2 + 1] + middleRight2) / 2.0;
+                } else {
+                    return (middleLeft2 + middleRight2) / 2.0;
+                }
+            }
         }
+
         if (nums2.length == 0) {
             if (nums1.length % 2 == 0) {
-                return (nums1[nums1.length / 2] + nums1[nums1.length / 2 - 1]) / 2.0;
+                return (nums1[nums1.length / 2 - 1] + nums1[nums1.length / 2]) / 2.0;
             } else {
                 return nums1[nums1.length / 2];
             }
+        } else if (nums2.length == 1 && nums1.length > 1) {
+            int middleLeft1 = nums1[nums1.length / 2 - 1];
+            int middleRight1 = nums1[nums1.length / 2];
+            if (nums1.length % 2 == 0) {
+                if (middleRight1 >= nums2[0] && middleLeft1 <= nums2[0]) {
+                    return nums2[0];
+                } else {
+                    return middleRight1;
+                }
+            } else {
+                if ((middleRight1 >= nums2[0] && middleLeft1 <= nums2[0]) || (middleRight1 <= nums2[0] && nums1[nums1.length / 2 + 1] >= nums2[0])) {
+                    return (nums2[0] + middleRight1) / 2.0;
+                } else if (middleRight1 >= nums2[0]) {
+                    return (nums1[nums1.length / 2 + 1] + middleRight1) / 2.0;
+                } else {
+                    return (middleLeft1 + middleRight1) / 2.0;
+                }
+            }
         }
+
+        if (nums1.length == 1 && nums2.length == 2) {
+            return (nums1[0]+nums2[0])/2.0;
+        }
+
 
         int startI = 0;
         int endI = nums1.length - 1;
@@ -47,8 +89,13 @@ class Solution {
                 i = startI + findMiddleIndex(startI, endI, false);
                 j = startJ + findMiddleIndex(startJ, endJ, true);
             } else {
-                notFound = false;
-                median = elemI;
+                if (nums1.length % 2 == 1 && nums2.length % 2 == 1) {
+                    notFound = false;
+                    median = elemI;
+                } else {
+                    notFound = false;
+                    median = (elemI + Math.min(nums1[i+1], nums2[j+1])) / 2.0;
+                }
             }
 
             if (endI - startI < 1 && !twoMedians) {
@@ -78,7 +125,7 @@ class Solution {
     }
 
     public static void main(String[] args) {
-        double medianSortedArrays = findMedianSortedArrays(new int[]{3}, new int[]{-2, -1});
+        double medianSortedArrays = findMedianSortedArrays(new int[]{1}, new int[]{1});
         System.out.println(medianSortedArrays);
     }
 }
