@@ -31,6 +31,8 @@ class Solution {
                     return (middleLeft2 + middleRight2) / 2.0;
                 }
             }
+        } else if (nums2.length == 1 && nums1.length == 1) {
+            return (nums1[0] + nums2[0]) / 2.0;
         }
 
         if (nums2.length == 0) {
@@ -39,7 +41,7 @@ class Solution {
             } else {
                 return nums1[nums1.length / 2];
             }
-        } else if (nums2.length == 1 && nums1.length > 1) {
+        } else if (nums2.length == 1) {
             int middleLeft1 = nums1[nums1.length / 2 - 1];
             int middleRight1 = nums1[nums1.length / 2];
             if (nums1.length % 2 == 0) {
@@ -58,11 +60,6 @@ class Solution {
                 }
             }
         }
-
-        if (nums1.length == 1 && nums2.length == 2) {
-            return (nums1[0]+nums2[0])/2.0;
-        }
-
 
         int startI = 0;
         int endI = nums1.length - 1;
@@ -94,7 +91,7 @@ class Solution {
                     median = elemI;
                 } else {
                     notFound = false;
-                    median = (elemI + Math.min(nums1[i+1], nums2[j+1])) / 2.0;
+                    median = (elemI + Math.min(nums1[i + 1], nums2[j + 1])) / 2.0;
                 }
             }
 
@@ -125,7 +122,7 @@ class Solution {
     }
 
     public static void main(String[] args) {
-        double medianSortedArrays = findMedianSortedArrays(new int[]{1}, new int[]{1});
+        double medianSortedArrays = findMedianSortedArrays(new int[]{1,3}, new int[]{2,7});
         System.out.println(medianSortedArrays);
     }
 }
