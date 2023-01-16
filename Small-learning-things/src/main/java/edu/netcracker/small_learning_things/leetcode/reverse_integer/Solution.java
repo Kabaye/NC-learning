@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.reverse_integer;
+package edu.netcracker.small_learning_things.leetcode.reverse_integer;
 
 /**
  * @author svku0919

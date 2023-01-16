@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.longest_substring;
+package edu.netcracker.small_learning_things.leetcode.longest_substring;
 
 import java.util.HashMap;
 

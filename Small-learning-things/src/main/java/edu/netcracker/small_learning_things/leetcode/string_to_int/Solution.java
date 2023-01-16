@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.string_to_int;
+package edu.netcracker.small_learning_things.leetcode.string_to_int;
 
 /**
  * @author svku0919

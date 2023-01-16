@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.longest_palindrome;
+package edu.netcracker.small_learning_things.leetcode.longest_palindrome;
 
 /**
  * @author svku0919

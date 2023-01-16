@@ -1,4 +1,4 @@
-package edu.netcracker.small_learning_things.median_of_two_sorted_arrays;
+package edu.netcracker.small_learning_things.leetcode.median_of_two_sorted_arrays;
 
 /**
  * @author svku0919
