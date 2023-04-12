@@ -1,8 +1,8 @@
-greeting:
-  message: "hello"
-
 quarkus:
   http:
     port: 8181
   swagger-ui:
     always-include: true
+
+quarkus-docker-demo:
+  default-amount: ${DEFAULT_AMOUNT:3}
