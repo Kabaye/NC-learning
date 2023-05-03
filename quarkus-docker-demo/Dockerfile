@@ -1,13 +1,13 @@
-FROM openjdk:17-oracle
+FROM maven:3.8.5-openjdk-17-slim AS build
+COPY src /app/src
+COPY pom.xml /app
+RUN mvn -f /app/pom.xml clean package
 
-#ARG DEF_AMOUNT
 ENV DEFAULT_AMOUNT 5
-
-ARG JAR_DIR=target/quarkus-app
-COPY ${JAR_DIR} /app/quarkus-app
-
-USER root
-
 EXPOSE 8181
 
-ENTRYPOINT ["java","-jar","/app/quarkus-app/quarkus-run.jar"]
+# for multi-stage build
+#COPY --from=build /app/target/quarkus-app /app/quakus-jar
+#ENTRYPOINT ["java","-jar","/app/quakus-jar/quarkus-run.jar"]
+
+ENTRYPOINT ["java","-jar","/app/target/quarkus-app/quarkus-run.jar"]
