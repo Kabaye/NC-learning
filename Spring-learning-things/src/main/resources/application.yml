@@ -1,0 +1,11 @@
+server:
+  port: 8181
+spring:
+  jpa:
+    database: POSTGRESQL
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5433/users
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
