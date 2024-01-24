@@ -22,7 +22,15 @@ package edu.netcracker.small_learning_things.leetcode.path_sum;
  */
 public class Solution {
     public boolean hasPathSum(TreeNode root, int targetSum) {
-        return true;
+        if (root == null) {
+            return false;
+        }
+
+        if (root.left == null && root.right == null) {
+            return targetSum == root.val;
+        }
+
+        return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val);
     }
 }
 
