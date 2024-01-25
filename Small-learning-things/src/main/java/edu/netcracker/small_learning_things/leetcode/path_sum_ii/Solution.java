@@ -1,10 +1,7 @@
 package edu.netcracker.small_learning_things.leetcode.path_sum_ii;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * @author svku0919
